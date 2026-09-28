@@ -1,3 +1,4 @@
+import Guide from "./Guide";
 import {
   FormEvent,
   KeyboardEvent,
@@ -1136,7 +1137,7 @@ function Landing({
   onLogin: () => void;
 }) {
   const navigate = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   };
 
   return (
@@ -1273,6 +1274,7 @@ function Landing({
           <p>Protótipo público — sem coleta ou envio de dados.</p>
         </div>
       </footer>
+      <Guide onNavigate={navigate} onSignup={onSignup} onLogin={onLogin} />
     </div>
   );
 }
