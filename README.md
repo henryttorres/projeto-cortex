@@ -1,4 +1,4 @@
-# projeto-cortex
+# Cortex
 Cortéx, uma iniciativa AI FIRST para desenvolvimento e capacitação de professores e alunos do ensino médio 
 # Fase 1 — arquitetura da informação e modelo conceitual
 
