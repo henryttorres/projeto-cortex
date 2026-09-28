@@ -1,0 +1,10 @@
+{
+  "name": "projeto-escola-cortex-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend do Projeto Escola Cortex",
+  "scripts": {
+    "dev": "echo \"Frontend em desenvolvimento\"",
+    "build": "echo \"Build do frontend\""
+  }
+}
