@@ -1,0 +1,123 @@
+{
+  "folders": [
+    {
+      "name": "CORTÉX · Projeto",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "window.title": "${dirty}${activeEditorShort}${separator}CORTÉX · ${rootPath}${separator}${appName}",
+    "workbench.startupEditor": "readme",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": false,
+    "files.encoding": "utf8",
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.pnpm-store": true,
+      "**/dist": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.pnpm-store": true,
+      "**/dist": true,
+      "**/pnpm-lock.yaml": true
+    },
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.patterns": {
+      "package.json": "pnpm-lock.yaml, tsconfig.json, vite.config.ts"
+    },
+    "terminal.integrated.cwd": "${workspaceFolder}/frontend",
+    "terminal.integrated.env.windows": {
+      "PATH": "${env:PATH};${env:USERPROFILE}\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;${env:USERPROFILE}\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback"
+    },
+    "typescript.tsdk": "frontend/node_modules/typescript/lib",
+    "liveServer.settings.root": "/frontend/dist"
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "options": {
+      "cwd": "${workspaceFolder}/frontend"
+    },
+    "tasks": [
+      {
+        "label": "Cortéx: 1. Instalar dependências",
+        "type": "shell",
+        "command": "pnpm",
+        "args": [
+          "install",
+          "--frozen-lockfile"
+        ],
+        "windows": {
+          "command": "pnpm.cmd"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Cortéx: 2. Iniciar site",
+        "type": "shell",
+        "command": "pnpm",
+        "args": [
+          "dev"
+        ],
+        "windows": {
+          "command": "pnpm.cmd"
+        },
+        "isBackground": true,
+        "problemMatcher": {
+          "owner": "vite",
+          "pattern": {
+            "regexp": "^(.*):(\\d+):(\\d+):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "message": 4
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".*vite.*",
+            "endsPattern": ".*Local:.*http.*"
+          }
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        }
+      },
+      {
+        "label": "Cortéx: 3. Verificar e gerar build",
+        "type": "shell",
+        "command": "pnpm",
+        "args": [
+          "build"
+        ],
+        "windows": {
+          "command": "pnpm.cmd"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": "$tsc"
+      },
+      {
+        "label": "Cortéx: 4. Visualizar build",
+        "type": "shell",
+        "command": "pnpm",
+        "args": [
+          "preview"
+        ],
+        "windows": {
+          "command": "pnpm.cmd"
+        },
+        "problemMatcher": [],
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        }
+      }
+    ]
+  }
+}

@@ -34,6 +34,6 @@ Aluno, responsável, professor, administração e suporte compartilham dados som
 - Versões das dependências preservadas pelo lockfile exportado.
 - Histórico de respostas, revisão do encerramento e limpeza de rascunhos evoluídos localmente.
 - A pasta original em Downloads e o arquivo Figma permanecem intactos. Alterações locais não sincronizam automaticamente com o Make.
-- O `index.html` da raiz do repositório é uma referência anterior; a aplicação atual está nesta pasta.
+- O `referencias/landing-antiga.html` é uma referência anterior; a aplicação atual está nesta pasta.
 
 Evidências e roteiro: [validação de 28/09](../docs/validacao-2026-09-28.md).

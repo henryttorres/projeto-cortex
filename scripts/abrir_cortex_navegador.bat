@@ -1,2 +1,2 @@
 @echo off
-start "" "http://localhost:4173/"
+start "" "http://127.0.0.1:5173/"

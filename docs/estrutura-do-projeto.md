@@ -13,6 +13,6 @@
 - `docs/guia-repositorio.md`: registro histórico do antigo readme minúsculo.
 - `docs/readme-demonstracao.md`: apresentação conceitual, com limites de validação.
 - `docs/arquitetura-v0.1.md`: visão inicial das camadas futuras.
-- `index.html` na raiz: referência estática anterior, preservada.
+- `referencias/landing-antiga.html`: referência estática anterior, preservada.
 
 Backend, banco de dados e motor de IA ainda são planejados. Pastas sem arquivos não são versionadas pelo Git. A execução atual parte de `frontend/`.

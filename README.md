@@ -2,7 +2,7 @@
 
 ## Estado atual — 28/09/2026
 
-Protótipo de baixa fidelidade exportado do Figma Make e executável localmente em **[frontend/](frontend/README.md)**. O arquivo `index.html` na raiz é uma referência anterior, não a aplicação React atual.
+Protótipo de baixa fidelidade exportado do Figma Make e executável localmente em **[frontend/](frontend/README.md)**. O HTML anterior está em `referencias/landing-antiga.html`. Abra [Cortex.code-workspace](Cortex.code-workspace) no VS Code e siga [COMECE-AQUI.md](COMECE-AQUI.md).
 
 ### Executar localmente
 
@@ -15,7 +15,7 @@ Opção 1: execução manual:
 $env:Path += ';C:\Program Files\nodejs'
 cd .\frontend
 pnpm install --frozen-lockfile
-pnpm dev --host 0.0.0.0 --port 4173
+pnpm dev
 ```
 
 Opção 2: execução automatizada com menu:
@@ -25,7 +25,7 @@ Opção 2: execução automatizada com menu:
 .\scripts\menu_cortex.bat
 ```
 
-O menu local automatiza a verificação do Node, a instalação do pnpm, a criação do servidor local e o controle de portas. O projeto será aberto em http://localhost:4173/.
+O menu verifica Node e pnpm, instala dependências ausentes e inicia o Vite em localhost. Não instala ferramentas globais nem encerra processos por porta. O projeto será aberto em http://127.0.0.1:5173/.
 
 Validação de build:
 
@@ -43,11 +43,11 @@ Atendimento com histórico e revisão de encerramento. [Resultados, evidências 
 Para facilitar a execução local, use o atalho [scripts/menu_cortex.bat](scripts/menu_cortex.bat). Ele automatiza:
 
 - verificação de Node.js
-- instalação do pnpm se necessário
-- limpeza de portas ocupadas
+- verificação de pnpm já instalado
+- aviso quando a porta está ocupada
 - inicialização do Vite localmente
 - abertura do navegador na aplicação
-- parada segura do servidor com `Ctrl+C` ou via script de encerramento
+- orientação para parar o servidor com `Ctrl+C` no terminal de execução
 
 Também há suporte de parada e abertura direta:
 
@@ -58,10 +58,10 @@ Também há suporte de parada e abertura direta:
 
 1. Execute [scripts/menu_cortex.bat](scripts/menu_cortex.bat) a partir da raiz do projeto
 2. Escolha a opção para iniciar o projeto
-3. Aguarde a inicialização do Vite em http://localhost:4173/
+3. Aguarde a inicialização do Vite em http://127.0.0.1:5173/
 4. Abra a URL no navegador
 5. Valide a landing e os fluxos de demonstração
-6. Para encerrar, use `Ctrl+C` no terminal ou [scripts/parar_cortex.bat](scripts/parar_cortex.bat)
+6. Para encerrar, use `Ctrl+C` no terminal de execução; [scripts/parar_cortex.bat](scripts/parar_cortex.bat) apenas mostra instruções
 
 
 ## Fase 1 — arquitetura da informação e modelo conceitual
