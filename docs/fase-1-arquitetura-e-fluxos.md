@@ -1,5 +1,7 @@
 # Fase 1 — arquitetura da informação e modelo conceitual
 
+Atualização de 28/09/2026: código exportado e evoluído em `frontend/`. Resultados da validação local, com limitações, em [validacao-2026-09-28.md](validacao-2026-09-28.md). O registro abaixo documenta a concepção original; os checkboxes originais não substituem o relatório de execução.
+
 Cortéx Instituto de Aprendizagem · arquitetando front e back end · 27/09/2026
 
 Prazo da ação: até 30 dias a partir do início acordado. Projeto completo: até 90 dias.

@@ -1,4 +1,20 @@
-# Fase 1 — arquitetura da informação e modelo conceitual
+# Cortéx Instituto de Aprendizagem
+
+## Estado atual — 28/09/2026
+
+Protótipo de baixa fidelidade exportado do Figma Make e executável localmente em **[frontend/](frontend/README.md)**. O arquivo `index.html` na raiz é uma referência anterior, não a aplicação React atual.
+
+```sh
+cd frontend
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Node.js 24 e pnpm 11 usados nesta validação. Abrir http://127.0.0.1:5173/. `pnpm build` verifica TypeScript e gera o build.
+
+Atendimento com histórico e revisão de encerramento. [Resultados, evidências e pendências](docs/validacao-2026-09-28.md). Dados fictícios em memória; sem backend, autenticação real ou IA conectada. Alterações locais não sincronizam automaticamente com o Figma.
+
+## Fase 1 — arquitetura da informação e modelo conceitual
 
 Cortéx Instituto de Aprendizagem · arquitetando front e back end com wireframe de baixa fidelidade · 27/09/2026
 
@@ -174,9 +190,9 @@ Esse conjunto valida a intenção de UX; não comprova autorização de produç�
 ## 8. Critérios de passagem para alta fidelidade
 
 - [ ] Todos os CTAs essenciais têm destino e retorno.
-- [ ] Contexto do estudante se mantém entre agenda e comunicados.
-- [ ] Publicação de aviso e leitura pelos destinatários passam no roteiro.
-- [ ] Encaminhamento, resposta do suporte e acompanhamento passam no roteiro.
+- [x] Contexto do estudante se mantém entre agenda e comunicados — roteiro local de 28/09.
+- [x] Publicação de aviso e leitura pelos destinatários passam no roteiro local de 28/09.
+- [x] Encaminhamento, resposta do suporte e acompanhamento passam no roteiro local de 28/09.
 - [ ] Mobile não esconde login nem sobrepõe controles essenciais.
 - [ ] Erros, vazio, confirmação e sessão indisponível têm tratamento.
 - [ ] Revisão com Henry/Eduardo e teste com representantes dos perfis registrados.
@@ -202,5 +218,5 @@ Meta de conclusão sem ajuda proposta: 85%, acompanhada de contagens por tarefa/
 ## 10. Evidências e estado
 
 A versão 3 do Make foi inspecionada em 27/09/2026. O histórico registra correção do botão Entrar mobile, nome acessível do menu e carrossel Flexbox/rodapé. Na sessão anterior foram percorridos interesse vazio, confirmação fictícia, login, recuperação e modal com Escape/retorno do foco.
-A expansão interna V0.2 é escopo de trabalho; sua geração não significa validação. Evidências novas devem ser registradas em relatório separado.
-Este commit versiona documentação; não contém exportação do código do Make nem implantação.
+A expansão interna V0.2 foi exportada e evoluída localmente em 28/09. Evidências desta rodada constam em [relatório separado](docs/validacao-2026-09-28.md), com os limites da validação.
+O primeiro commit da fase versionou apenas documentação. O repositório agora contém o código exportado em `frontend/`, sem implantação pública.

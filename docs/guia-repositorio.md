@@ -1,5 +1,7 @@
 # Cortéx Instituto de Aprendizagem
 
+> Registro histórico: conteúdo preservado do antigo `readme.md` para resolver a colisão com `README.md` no Windows. Caminhos locais e estrutura descritos abaixo eram uma proposta anterior; consulte [estrutura-do-projeto.md](estrutura-do-projeto.md) para os arquivos efetivamente versionados e o README principal para o estado atual.
+
 ## Visão geral
 
 O Cortéx Instituto de Aprendizagem é uma solução educacional com foco em atendimento inteligente, organização escolar e suporte operacional para instituições de ensino. A estrutura foi organizada para separar documentação, inteligência artificial, backend e frontend, facilitando a rastreabilidade, manutenção e evolução do projeto.

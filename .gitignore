@@ -4,6 +4,7 @@ build/
 dist/
 coverage/
 .npm/
+.pnpm-store/
 *.log
 
 # Variáveis de ambiente e segredos

@@ -1,10 +1,28 @@
 {
-  "name": "projeto-escola-cortex-frontend",
-  "version": "0.1.0",
+  "name": "cortex-wireframe",
   "private": true,
-  "description": "Frontend do Projeto Escola Cortex",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "echo \"Frontend em desenvolvimento\"",
-    "build": "echo \"Build do frontend\""
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "format": "oxfmt"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "oxfmt": "^0.2.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.0.5"
   }
 }

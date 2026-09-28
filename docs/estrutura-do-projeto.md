@@ -1,70 +1,18 @@
-# Estrutura do Repositório – Cortéx Instituto de Aprendizagem
+# Estrutura versionada — 28/09/2026
 
-Este documento serve como guia operacional para localizar, manter e rastrear as áreas do projeto de forma clara.
+- `README.md`: entrada do projeto, execução e arquitetura conceitual.
+- `frontend/src/App.tsx`: protótipo público e portal de demonstração.
+- `frontend/src/index.css`: estilos responsivos de baixa fidelidade.
+- `frontend/src/main.tsx`: entrada React.
+- `frontend/index.html`, `vite.config.ts`, `tsconfig.json`: configuração local.
+- `frontend/package.json`, `pnpm-lock.yaml`: scripts, dependências e versões.
+- `frontend/README.md`: execução e origem da exportação.
+- `docs/fase-1-arquitetura-e-fluxos.md`: entidades, relações e mapa de navegação.
+- `docs/validacao-2026-09-28.md`: roteiro executado, evidências e pendências.
+- `docs/evidencias/2026-09-28/`: capturas do protótipo local.
+- `docs/guia-repositorio.md`: registro histórico do antigo readme minúsculo.
+- `docs/readme-demonstracao.md`: apresentação conceitual, com limites de validação.
+- `docs/arquitetura-v0.1.md`: visão inicial das camadas futuras.
+- `index.html` na raiz: referência estática anterior, preservada.
 
-## Repositório oficial
-
-- GitHub: https://github.com/henryttorres/projeto-cortex
-
-## Visão geral
-
-```md
-projeto-cortex/
-├── .gitignore
-├── ai_engine/
-│   ├── fine-tuning/
-│   ├── prompts/
-│   └── rag/
-├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   └── services/
-│   ├── .env.example
-│   └── package.json
-├── docs/
-│   ├── arquitetura-v0.1.md
-│   ├── banco-de-dados/
-│   ├── estrutura-do-projeto.md
-│   └── readme-demonstracao.md
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── routes/
-│   │   └── services/
-│   └── package.json
-├── index.html
-├── readme.md
-└── .gitignore
-```
-
-## Objetivo de cada área
-
-### `docs/`
-Armazena documentação técnica, arquitetura, banco de dados e materiais de apresentação.
-
-### `ai_engine/`
-Reúne os artefatos de IA, incluindo prompts, segmentação de conhecimento e materiais de fine-tuning.
-
-### `backend/`
-Responsável pela lógica do servidor, API, regras de negócio e integração com IA.
-
-### `frontend/`
-Responsável pela interface do usuário e fluxo de navegação do sistema.
-
-## Quando usar cada arquivo
-
-- `readme.md`: guia prático do repositório e organização geral.
-- `docs/readme-demonstracao.md`: apresentação institucional e conceitual para GitHub ou pitch.
-- `docs/arquitetura-v0.1.md`: visão geral da arquitetura da solução.
-- `docs/banco-de-dados/`: diagramas, modelos e scripts de apoio.
-
-## Regras de manutenção
-
-- Manter nomes de pastas estáveis para evitar divergência entre documentação e código.
-- Atualizar a documentação sempre que uma área receber nova estrutura ou novo módulo.
-- Manter `.gitignore` ativo para evitar o versionamento de arquivos sensíveis.
+Backend, banco de dados e motor de IA ainda são planejados. Pastas sem arquivos não são versionadas pelo Git. A execução atual parte de `frontend/`.

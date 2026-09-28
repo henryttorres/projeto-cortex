@@ -88,10 +88,12 @@ erDiagram
 
 Para que uma tela seja promovida para alta fidelidade, ela deve obrigatoriamente cumprir:
 
-* [x] CTAs essenciais possuem destino e rotas de retorno mapeadas.
+* [ ] Revisão completa dos CTAs essenciais e rotas de retorno; principais fluxos mapeados.
 * [x] O contexto do estudante se mantém estável ao transitar entre agenda e comunicados.
-* [x] Fluxo de criação de avisos testado contra vazamento de permissão.
-* [x] Layout mobile responsivo (360px a 1440px), sem menus ou flutuantes sobrepondo controles críticos.
-* [x] Tratamento de estados de interface implementado: *Loading*, *Error*, *Empty State* e *Success*.
+* [x] Criação de avisos e filtro por turma percorridos no protótipo; não é teste de permissão no servidor.
+* [ ] Revisão completa de responsividade: landing, revisão de comunicado e acompanhamento medidos em cinco larguras sem overflow; demais telas e dispositivos ainda pendentes.
+* [ ] Auditoria completa dos estados de interface; erros, vazio e confirmação presentes em fluxos específicos, sem comprovação de cobertura total.
+
+Evidências e limites: [validação local de 28/09](validacao-2026-09-28.md). Backend e RBAC são arquitetura proposta, não controle implementado nesta versão. Paleta azul/ciano é referência futura; o protótipo continua em cinzas.
 
 *Documentação técnica elaborada por Henry e Eduardo. Notas, pagamentos e diagnósticos pedagógicos automatizados estão intencionalmente fora do escopo deste MVP.*
