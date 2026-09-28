@@ -1,8 +1,8 @@
 # Fase 1 — arquitetura da informação e modelo conceitual
 
-Cortéx Instituto de Aprendizagem · versão de trabalho 0.2 · 27/09/2026 (America/Bahia)
+Cortéx Instituto de Aprendizagem · arquitetando front e back end · 27/09/2026
 
-Responsáveis: Henry e Eduardo. Prazo da ação: até 30 dias a partir do início acordado. Projeto completo: até 90 dias.
+Prazo da ação: até 30 dias a partir do início acordado. Projeto completo: até 90 dias.
 
 [Protótipo Figma Make](https://www.figma.com/make/On6DHqjebObIzN21tfJVHO/)
 
