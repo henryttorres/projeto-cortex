@@ -9,7 +9,7 @@ O Cortéx Instituto de Aprendizagem é uma solução educacional com foco em ate
 ## Repositório GitHub
 
 - URL do repositório: https://github.com/henryttorres/projeto-cortex
-- Diretório local do projeto: `C:\Users\henry\OneDrive\Área de Trabalho\DEV MODE\projeto_escola_cortex`
+- Diretório local do projeto: ambiente de desenvolvimento local, não versionado no GitHub
 - Comando de configuração padrão:
 
 

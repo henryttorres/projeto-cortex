@@ -4,15 +4,65 @@
 
 Protótipo de baixa fidelidade exportado do Figma Make e executável localmente em **[frontend/](frontend/README.md)**. O arquivo `index.html` na raiz é uma referência anterior, não a aplicação React atual.
 
-```sh
-cd frontend
+### Executar localmente
+
+Para rodar o projeto em ambiente Windows, é necessário ter o Node.js instalado. A versão utilizada na validação foi Node.js 24 e pnpm 11.
+
+Opção 1: execução manual:
+
+```powershell
+# a partir da raiz do projeto
+$env:Path += ';C:\Program Files\nodejs'
+cd .\frontend
 pnpm install --frozen-lockfile
-pnpm dev
+pnpm dev --host 0.0.0.0 --port 4173
 ```
 
-Node.js 24 e pnpm 11 usados nesta validação. Abrir http://127.0.0.1:5173/. `pnpm build` verifica TypeScript e gera o build.
+Opção 2: execução automatizada com menu:
+
+```powershell
+# a partir da raiz do projeto
+.\scripts\menu_cortex.bat
+```
+
+O menu local automatiza a verificação do Node, a instalação do pnpm, a criação do servidor local e o controle de portas. O projeto será aberto em http://localhost:4173/.
+
+Validação de build:
+
+```powershell
+cd .\frontend
+pnpm build
+```
+
+`pnpm build` verifica TypeScript e gera o build da aplicação.
 
 Atendimento com histórico e revisão de encerramento. [Resultados, evidências e pendências](docs/validacao-2026-09-28.md). Dados fictícios em memória; sem backend, autenticação real ou IA conectada. Alterações locais não sincronizam automaticamente com o Figma.
+
+### Menu de desenvolvimento
+
+Para facilitar a execução local, use o atalho [scripts/menu_cortex.bat](scripts/menu_cortex.bat). Ele automatiza:
+
+- verificação de Node.js
+- instalação do pnpm se necessário
+- limpeza de portas ocupadas
+- inicialização do Vite localmente
+- abertura do navegador na aplicação
+- parada segura do servidor com `Ctrl+C` ou via script de encerramento
+
+Também há suporte de parada e abertura direta:
+
+- [scripts/parar_cortex.bat](scripts/parar_cortex.bat)
+- [scripts/abrir_cortex_navegador.bat](scripts/abrir_cortex_navegador.bat)
+
+### Teste funcional do fluxo local
+
+1. Execute [scripts/menu_cortex.bat](scripts/menu_cortex.bat) a partir da raiz do projeto
+2. Escolha a opção para iniciar o projeto
+3. Aguarde a inicialização do Vite em http://localhost:4173/
+4. Abra a URL no navegador
+5. Valide a landing e os fluxos de demonstração
+6. Para encerrar, use `Ctrl+C` no terminal ou [scripts/parar_cortex.bat](scripts/parar_cortex.bat)
+
 
 ## Fase 1 — arquitetura da informação e modelo conceitual
 
