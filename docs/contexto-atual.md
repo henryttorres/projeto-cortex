@@ -3,21 +3,18 @@
 Atualizado em 29/09/2026. Responsáveis: Henry e Eduardo.
 
 ## Estado
-React/TypeScript/Vite em frontend. Protótipo com dados fictícios em memória. Backend, autenticação real, banco, persistência, IA e deploy público não implementados.
+Protótipo React/TypeScript/Vite em frontend, com dados fictícios em memória. Backend, autenticação real, persistência, IA e deploy público não implementados.
 
-Landing começou a transição para alta fidelidade: Sora nos títulos, Source Sans 3 nos textos, paleta petróleo/ciano/off-white e degradês pontuais. Fontes locais com licenças. Estilos em frontend/src/brand.css, limitados à landing. Formulários e portais mantêm baixa fidelidade. Mídia ainda usa placeholders.
+Identidade aplicada à landing, interesse, login, recuperação, seleção de perfis e portais de aluno, responsável, professor, administração e suporte. Sora nos títulos; Source Sans 3 nos textos; fontes locais licenciadas. Paleta petróleo/ciano/off-white, seleção em verde-petróleo e erros em vermelho com mensagens. Estilos compartilhados em frontend/src/brand.css.
 
-Guia Cortéx em frontend/src/Guide.tsx e guide.css: botão inferior direito, diálogo responsivo, seis caminhos por botões, fechamento ao encaminhar, Escape e controle de foco. Não há IA conectada.
+Usuário aprovou a logo cerebral em 29/09 e forneceu recorte: frontend/public/brand/cortex-logo.png. Imagem original preservada, aplicada pelo componente Brand nos cabeçalhos e rodapé. É PNG com fundo, não vetor. Refinamento vetorial pode ocorrer depois. Imagens e vídeos do carrossel adiados conforme alinhamento.
 
-## Marca
-Prancha conceitual docs/marca/cortex-direcao-01.png gerada anteriormente com ImageGen; tentativa no Higgsfield bloqueada por exigência de plano. Marca cerebral ainda precisa refinamento vetorial; não tratar como aprovada. Diretrizes e próximos passos em docs/marca/direcao-visual.md.
+Guia público: frontend/src/Guide.tsx e guide.css, seis opções predefinidas e diálogo responsivo. Sem IA conectada.
 
-## Verificação atual
-29/09: build TypeScript/Vite aprovado. Chrome: landing sem overflow horizontal em 360/390/768/1440; guia móvel inspecionado; participação → formulário → retorno; Shift+Tab e Escape/foco aprovados. Console observado sem erros. Relatório docs/validacao-2026-09-29.md.
+## Verificação
+Build TypeScript/Vite aprovado após integração. Chrome: navegação pelas seções dos perfis aluno, professor, admin e suporte em 360 px, sem overflow; telas de conta também em 1440 px. Responsável: início e agenda, troca Lucas/Bia preservada. Interesse: erros vazios e confirmação; recuperação: confirmação simulada. Console observado sem erros. Evidências atuais em docs/evidencias/2026-09-29. Não é auditoria completa nem teste com usuários.
 
-Resultados dos fluxos internos em docs/validacao-2026-09-28.md são históricos. Imagens do guia em docs/evidencias/2026-09-28 também precedem a nova paleta.
+## Continuidade
+Revisar a composição com Henry/Eduardo; depois escolher mídia da landing/carrossel, otimizar logo para tamanhos pequenos e avaliar acessibilidade completa. A alta fidelidade continua em evolução.
 
-## Organização e próximo passo
-COMECE-AQUI.md e Cortex.code-workspace orientam VS Code. Este checkout e a cópia DEV MODE precisam ser comparados antes de sincronizar; preservar alterações locais e backend vazio do usuário. Não presumir servidor ativo.
-
-Consolidar logo/mídia e revisar a landing antes de aplicar identidade aos formulários e cinco perfis. Validar acessibilidade e experiência com usuários. Fontes: código local, build e observação do navegador em 29/09/2026.
+COMECE-AQUI.md e Cortex.code-workspace orientam VS Code. Comparar estado antes de sincronizar a cópia DEV MODE; preservar ZIP e arquivos do usuário. Não presumir servidor ativo. Relatórios anteriores são evidência histórica.

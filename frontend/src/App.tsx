@@ -160,13 +160,7 @@ function Placeholder({ children, compact = false }: { children: ReactNode; compa
 function Brand({ onClick }: { onClick?: () => void }) {
   return (
     <button className="brand" onClick={onClick} aria-label="Cortéx — ir para o início">
-      <span className="brand__mark" aria-hidden="true">
-        C
-      </span>
-      <span>
-        <strong>Cortéx</strong>
-        <small>Instituto de Aprendizagem</small>
-      </span>
+      <img className="brand__logo" src="/brand/cortex-logo.png" width="842" height="317" alt="Cortéx Instituto de Aprendizagem" />
     </button>
   );
 }

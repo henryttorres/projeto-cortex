@@ -1,7 +1,7 @@
-/* Primeira aplicação da direção institucional: landing e guia público. */
+/* Identidade compartilhada entre landing, formulários e portais. */
 @font-face { font-family: 'Sora'; src: url('/fonts/Sora-variable.ttf') format('truetype'); font-weight: 100 800; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Source Sans 3'; src: url('/fonts/SourceSans3-variable.ttf') format('truetype'); font-weight: 200 900; font-style: normal; font-display: swap; }
-#inicio {
+:root {
   --paper: #f7f7f2;
   --ink: #102b3f;
   --muted: #435b63;
@@ -16,7 +16,7 @@
   color: var(--ink);
   background: var(--paper);
 }
-#inicio h1, #inicio h2, #inicio h3, #inicio .brand strong { font-family: 'Sora', sans-serif; }
+h1, h2, h3, .brand strong { font-family: 'Sora', sans-serif; }
 #inicio h1 { font-size: clamp(2.35rem, 4.6vw, 4.6rem); line-height: 1.1; letter-spacing: -.055em; font-weight: 600; }
 #inicio h2 { font-size: clamp(1.8rem, 3.2vw, 3rem); line-height: 1.15; font-weight: 500; }
 #inicio h3 { letter-spacing: -.035em; }
@@ -50,3 +50,36 @@
 #inicio .guide-options button:hover { background: #eaf1ec; border-color: #16666b; }
 #inicio .guide-close { border-color: #617f83; }
 @media (prefers-reduced-motion: reduce) { #inicio .button, #inicio .guide-options button { transition: none; } }
+/* Logo fornecida pelo usuário, preservada sem redesenho. */
+.brand { flex-shrink: 0; max-width: 100%; }
+.brand__logo { display: block; width: 218px; height: auto; max-width: 100%; border-radius: 4px; }
+.portal-sidebar .brand__logo { width: 208px; }
+.simple-header { background: var(--paper); }
+h1, h2 { line-height: 1.12; }
+.button--primary { color: #fff; background: #16666b; border-color: #16666b; }
+.button--primary:hover { background: #102b3f; border-color: #102b3f; }
+.form-panel { border-color: var(--line); border-radius: 20px; box-shadow: 0 12px 40px #102b3f08; }
+.form-panel h1 { font-size: clamp(2rem, 5vw, 3rem); }
+.portal-page-title h1 { font-size: clamp(2rem, 4vw, 3.25rem); }
+.portal-card, .student-switcher, .agenda-list article, .record-list article,
+.communication-detail, .review-box, .account-box, .guided-answer, .empty-state,
+.support-reply, .portal-form { border-color: var(--line); border-radius: 12px; }
+.portal-card .eyebrow, .portal-page-title > .eyebrow { color: #16666b; }
+.portal-sidebar nav button.is-active, .portal-mobile-nav button.is-active,
+.student-switcher button.is-active { background: #16666b; border-color: #16666b; color: #fff; }
+.portal-sidebar nav button, .student-switcher button { min-height: 44px; }
+.portal-banner { background: #102b3f; color: #f7f7f2; }
+.demo-warning, .ai-disclaimer { border-style: solid; border-color: var(--line); border-radius: 10px; }
+.field input, .field textarea, .field select { background: #fff; min-height: 48px; }
+.field input[aria-invalid="true"], .field textarea[aria-invalid="true"] { border-color: #a52d36; }
+.field__error { color: #a52d36; }
+.confirmation__mark { color: #16666b; background: #eaf1ec; border-color: #16666b; }
+.review-box { border-left: 4px solid #16666b; }
+.note, .inline-notice, .portal-footnote { border-left-color: #16666b; }
+@media (max-width: 600px) {
+  .brand__logo { width: 170px; }
+  .header-inner { gap: 8px; }
+  .simple-header__inner { gap: 12px; }
+  .version-label { font-size: .65rem; }
+}
+@media (max-width: 370px) { .site-header .brand__logo { width: 145px; } }

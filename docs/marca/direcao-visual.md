@@ -33,3 +33,6 @@ Botão inferior direito; abre apenas ao clique. Em desktop, painel lateral; em m
 | Validar experiência web/mobile | Henry e Eduardo | Dentro da primeira fase de até 30 dias | Fluxos críticos concluídos; problemas registrados e tratados |
 
 A landing ainda contém placeholders de mídia e identificação de conteúdo provisório. Portais e formulários preservam o wireframe anterior. Esta entrega inicia a alta fidelidade; não a encerra.
+
+## Integração aprovada em 29/09/2026
+O usuário aprovou a logo cerebral e forneceu o recorte utilizado em frontend/public/brand/cortex-logo.png. O arquivo foi preservado sem geração ou edição de imagem. O componente Brand agora o utiliza na landing, formulários e portais. A identidade foi estendida às demais telas com estados de seleção, erro e confirmação. Imagens e vídeos ficam para a próxima etapa. As descrições acima da primeira aplicação são históricas; a marca está aprovada para este protótipo, ainda em PNG com fundo.
