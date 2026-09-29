@@ -1,4 +1,5 @@
 import Guide from "./Guide";
+import LearningVideo from "./LearningVideo";
 import {
   FormEvent,
   KeyboardEvent,
@@ -329,6 +330,7 @@ function EventsCarousel() {
 
   return (
     <>
+      <LearningVideo />
       <div className="carousel">
         <div className="carousel__header">
           <p className="instruction">Arraste os cartões ou use os controles. Também funciona com as setas do teclado.</p>

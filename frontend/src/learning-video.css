@@ -1,0 +1,16 @@
+.learning-video { margin-bottom: var(--space-6); }
+.learning-video__heading { max-width: 46rem; }
+.learning-video__heading h3 { font-size: clamp(1.4rem, 2.5vw, 2rem); }
+.learning-video__stage { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: #102b3f; }
+.learning-video video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; }
+.learning-video__example { position: absolute; right: 24px; bottom: 76px; width: min(300px, 32%); padding: 20px; border: 1px solid #c6d6d3; border-radius: 12px; background: #f7f7f2f5; }
+.learning-video__example .eyebrow { color: #16666b; font-size: .7rem; }
+.learning-video__example p { margin-bottom: 12px; font-size: .95rem; line-height: 1.4; }
+.learning-video__example strong, .learning-video__example span { display: block; }
+.learning-video__example strong { color: #102b3f; }
+.learning-video__example small { display: block; color: #435b63; font-size: .75rem; }
+.learning-video__caption { margin: 12px 0 0; max-width: 60rem; font-size: .85rem; }
+.learning-video__fallback { padding: 40px; color: #fff; }
+@media (max-width: 1000px) {
+  .learning-video__example { position: static; width: auto; border: 0; border-radius: 0; background: #f7f7f2; }
+}

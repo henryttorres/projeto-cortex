@@ -23,3 +23,11 @@ Limites: não é auditoria completa de acessibilidade; sem teste com usuários; 
 - Formulário de interesse: erros ao enviar vazio e confirmação com dados fictícios; recuperação com teste@example.com mostrou confirmação simulada.
 - Console sem erros observados. Capturas desta rodada em docs/evidencias/2026-09-29.
 - Escopo visual e navegação: não repetidos todos os testes de publicação/encerramento de chamados, pois a lógica não mudou.
+
+
+## Integração do vídeo fornecido pelo usuário
+Origem: pasta frontend/videos da cópia DEV MODE, arquivo Estudante_e_professora_usando_no…_20260929124504.mp4. Original preservado. Cópia utilizada: frontend/public/videos/aprendizagem-com-tecnologia.mp4 (1.616.925 bytes, duração observada de 8 segundos). Usuário informou geração no Google Flow; conteúdo rotulado como cena gerada com IA.
+
+LearningVideo adiciona destaque acima dos cartões do carrossel. O exemplo de orientação é HTML estático, não transcrição do vídeo. Em até 1000 px, fica abaixo da cena. Controles nativos, muted e playsInline; sem autoplay ou repetição automática. Preload de metadados. Pausa automática ao sair do viewport ou ocultar a aba implementada; erro de mídia mostra descrição alternativa.
+
+Build aprovado. Chrome: readyState 4, duração de 8 segundos; play e pause por teclado confirmados. Em 390 px, cartão estático abaixo e sem overflow horizontal. Console sem erros observados. Evidência: video-integrado.png. Pausa automática e fallback de falha não foram validados conclusivamente. As imagens dos demais cartões continuam pendentes.
