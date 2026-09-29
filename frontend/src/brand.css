@@ -1,0 +1,52 @@
+/* Primeira aplicação da direção institucional: landing e guia público. */
+@font-face { font-family: 'Sora'; src: url('/fonts/Sora-variable.ttf') format('truetype'); font-weight: 100 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Source Sans 3'; src: url('/fonts/SourceSans3-variable.ttf') format('truetype'); font-weight: 200 900; font-style: normal; font-display: swap; }
+#inicio {
+  --paper: #f7f7f2;
+  --ink: #102b3f;
+  --muted: #435b63;
+  --line: #c6d6d3;
+  --line-dark: #617f83;
+  --surface: #eaf1ec;
+  --surface-dark: #dae8e3;
+  --focus: #16666b;
+  --radius: 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1.0625rem;
+  color: var(--ink);
+  background: var(--paper);
+}
+#inicio h1, #inicio h2, #inicio h3, #inicio .brand strong { font-family: 'Sora', sans-serif; }
+#inicio h1 { font-size: clamp(2.35rem, 4.6vw, 4.6rem); line-height: 1.1; letter-spacing: -.055em; font-weight: 600; }
+#inicio h2 { font-size: clamp(1.8rem, 3.2vw, 3rem); line-height: 1.15; font-weight: 500; }
+#inicio h3 { letter-spacing: -.035em; }
+#inicio .hero { background: radial-gradient(ellipse at 100% 25%, #58cdd21c, transparent 65%); }
+#inicio .hero__content > .eyebrow { color: #16666b; }
+#inicio .brand__mark { background: linear-gradient(135deg, #58cdd2, #16666b); color: #102b3f; border: 0; }
+#inicio .button--primary { background: #16666b; border-color: #16666b; color: #fff; }
+#inicio .button--primary:hover { background: #102b3f; border-color: #102b3f; }
+#inicio .button, #inicio .guide-options button { transition: background-color 160ms ease, border-color 160ms ease; }
+#inicio .nav-login { border-color: #16666b; color: #16666b; }
+#inicio .placeholder { border-radius: 20px; color: #435b63; background: linear-gradient(140deg, #dae8e3, #bce5e1); }
+#inicio .placeholder > span { background: #eaf1ec; border-radius: 4px; }
+#inicio .pillars { border-radius: 16px; overflow: hidden; background: var(--paper); }
+#inicio .pillar__number { color: #16666b; font-family: 'Sora', sans-serif; }
+#inicio .ai-note { border-style: solid; border-left: 4px solid #16666b; border-radius: 0 12px 12px 0; }
+#inicio .ai-note__label { border-color: #16666b; color: #16666b; border-radius: 6px; }
+#inicio .steps__number { background: #16666b; color: #fff; }
+#inicio .event-card { border-color: var(--line); border-radius: 16px; overflow: hidden; }
+#inicio .event-card .placeholder { border-radius: 0; border-width: 0 0 1px; }
+#inicio .final-cta { background: linear-gradient(125deg, #102b3f, #16666b); }
+#inicio .final-cta .button { background: #f7f7f2; color: #102b3f; border-color: #f7f7f2; }
+#inicio .final-cta .button:hover { background: #58cdd2; border-color: #58cdd2; }
+#inicio .guide-launcher { background: #102b3f; border-color: #58cdd2; box-shadow: 0 6px 24px #102b3f22; }
+#inicio .guide-panel { color: #102b3f; background: #f7f7f2; border-color: #617f83; }
+#inicio .guide-header { border-color: #c6d6d3; background: #eaf1ec; }
+#inicio .guide-header h2 { font-size: 1.125rem; }
+#inicio .guide-disclaimer { background: #dae8e3; color: #102b3f; }
+#inicio .guide-bubble { background: #fff; border-color: #c6d6d3; }
+#inicio .guide-bubble small, #inicio .guide-footer { color: #435b63; }
+#inicio .guide-options button { border-color: #617f83; background: #fff; }
+#inicio .guide-options button:hover { background: #eaf1ec; border-color: #16666b; }
+#inicio .guide-close { border-color: #617f83; }
+@media (prefers-reduced-motion: reduce) { #inicio .button, #inicio .guide-options button { transition: none; } }
