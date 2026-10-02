@@ -27,7 +27,7 @@ export default function LearningVideo() {
     <div className="learning-video__stage">
       {failed ? <p className="learning-video__fallback" role="status">Não foi possível carregar o vídeo. A cena ilustrativa apresenta estudante e professora utilizando um notebook.</p> :
         <video ref={video} controls muted playsInline preload="metadata" aria-label="Cena ilustrativa: estudante e professora utilizando um notebook" aria-describedby="learning-video-caption" onError={() => setFailed(true)}>
-          <source src="/videos/aprendizagem-com-tecnologia.mp4" type="video/mp4" onError={() => setFailed(true)} />
+          <source src="/videos/aprendizagem-com-tecnologia-sem-audio.mp4" type="video/mp4" onError={() => setFailed(true)} />
           Seu navegador não oferece reprodução deste vídeo.
         </video>}
       <aside className="learning-video__example" aria-label="Exemplo de orientação com IA">
