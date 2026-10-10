@@ -43,3 +43,5 @@ Thumbs.db
 
 # Ferramentas locais de mídia
 .codex-media-tools/
+.local-tools/
+.local-data/

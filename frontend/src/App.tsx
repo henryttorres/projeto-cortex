@@ -1,4 +1,5 @@
 import Guide from "./Guide";
+import ConnectedPortal, { login, restoreSession, type User } from './ConnectedPortal';
 import LearningVideo from "./LearningVideo";
 import {
   FormEvent,
@@ -437,35 +438,42 @@ function LoginScreen({
   onHome,
   onRecovery,
   onExplore,
+  onAuthenticated,
 }: {
   onHome: () => void;
   onRecovery: () => void;
   onExplore: () => void;
+  onAuthenticated: (user: User) => void;
 }) {
-  const [message, setMessage] = useState(false);
+  const [message, setMessage] = useState('');
+  const [pending, setPending] = useState(false);
 
   return (
     <SimpleScreen eyebrow="Área de acesso" title="Já tenho cadastro" onHome={onHome}>
-      <p>Esta tela demonstra o acesso de uma versão futura.</p>
+      <p>Entre com sua conta para consultar a agenda dos seus vínculos autorizados.</p>
       <form
         className="form"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
-          setMessage(true);
+          setPending(true); setMessage('');
+          const form = new FormData(event.currentTarget);
+          try { onAuthenticated(await login(String(form.get('email')), String(form.get('password')))); }
+          catch (error) { setMessage(error instanceof Error ? error.message : 'Não foi possível entrar.'); }
+          finally { setPending(false); }
         }}
       >
         <div className="field">
           <label htmlFor="login-email">E-mail</label>
-          <input id="login-email" type="email" autoComplete="email" required />
+          <input id="login-email" name="email" type="email" autoComplete="email" required />
         </div>
         <div className="field">
           <label htmlFor="login-password">Senha</label>
-          <input id="login-password" type="password" autoComplete="current-password" required />
+          <input id="login-password" name="password" type="password" autoComplete="current-password" required maxLength={128} />
         </div>
-        <Button type="submit">Entrar</Button>
+        <Button type="submit" disabled={pending}>{pending ? 'Entrando…' : 'Entrar'}</Button>
         <Button type="button" variant="text" onClick={onRecovery}>Esqueci minha senha</Button>
       </form>
-      {message && <div className="inline-notice" role="status"><strong>Acesso demonstrativo.</strong> O portal está fora desta versão.</div>}
+      {message && <div className="inline-notice" role="alert">{message}</div>}
       <div className="explore-portal">
         <span className="eyebrow">Novo na V0.2</span>
         <p>Conheça os fluxos internos usando apenas identidades e dados fictícios.</p>
@@ -1276,6 +1284,9 @@ function Landing({
 }
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState<User | null>(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  useEffect(() => { restoreSession().then(setAuthenticated).catch(() => {}).finally(() => setCheckingSession(false)); }, []);
   const [screen, setScreen] = useState<Screen>("landing");
   const [profile, setProfile] = useState<Profile>("student");
   const [communications, setCommunications] = useState<Communication[]>(initialCommunications);
@@ -1295,8 +1306,10 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [screen]);
 
+  if (checkingSession) return <main className="container section" role="status">Carregando Cortéx…</main>;
+  if (authenticated) return <ConnectedPortal user={authenticated} onLogout={() => { setAuthenticated(null); setScreen('login'); }} />;
   if (screen === "signup") return <SignupScreen onHome={() => setScreen("landing")} />;
-  if (screen === "login") return <LoginScreen onHome={() => setScreen("landing")} onRecovery={() => setScreen("recovery")} onExplore={() => setScreen("profiles")} />;
+  if (screen === "login") return <LoginScreen onAuthenticated={setAuthenticated} onHome={() => setScreen("landing")} onRecovery={() => setScreen("recovery")} onExplore={() => setScreen("profiles")} />;
   if (screen === "recovery") return <RecoveryScreen onHome={() => setScreen("landing")} onLogin={() => setScreen("login")} />;
   if (screen === "profiles") return <ProfileSelector onBack={() => setScreen("login")} onSelect={(nextProfile) => { setProfile(nextProfile); setScreen("portal"); }} />;
   if (screen === "portal") {

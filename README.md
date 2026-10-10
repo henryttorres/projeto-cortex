@@ -1,6 +1,20 @@
 # Cortéx Instituto de Aprendizagem
 
-## Estado atual — 28/09/2026
+## Estado atual — 10/10/2026
+
+Primeira integração real disponível: **NestJS + Prisma + PostgreSQL**, com login,
+sessão, vínculos autorizados e agenda persistida. Professora publica compromissos
+para sua turma; aluno e responsável consultam apenas seus vínculos. O portal
+demonstrativo anterior permanece separado.
+
+Preparação e acessos: [backend/README.md](backend/README.md).
+Resultados e limites: [relatório da integração](docs/integracao-backend-2026-10-10.md).
+Localhost: http://127.0.0.1:5173 (requer API e banco ativos).
+
+Comunicados, chamados, interesse, recuperação de senha, IA e implantação pública
+ainda não estão integrados. Não usar dados pessoais reais no ambiente de teste.
+
+## Histórico do protótipo — 28/09/2026
 
 Protótipo de baixa fidelidade exportado do Figma Make e executável localmente em **[frontend/](frontend/README.md)**. O HTML anterior está em `referencias/landing-antiga.html`. Abra [Cortex.code-workspace](Cortex.code-workspace) no VS Code e siga [COMECE-AQUI.md](COMECE-AQUI.md).
 

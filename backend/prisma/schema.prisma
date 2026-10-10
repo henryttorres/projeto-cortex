@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+enum Role {
+  student
+  guardian
+  teacher
+  admin
+  support
+}
+model Account {
+  id String @id @default(uuid()) @db.Uuid
+  email String @unique
+  name String
+  passwordHash String
+  active Boolean @default(true)
+  roles AccountRole[]
+  student Student?
+  guardians GuardianLink[]
+  teachings Teaching[]
+  sessions Session[]
+  createdAt DateTime @default(now())
+}
+model AccountRole {
+  accountId String @db.Uuid
+  role Role
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  @@id([accountId, role])
+}
+model Student {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  accountId String? @unique @db.Uuid
+  account Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  guardians GuardianLink[]
+  enrollments Enrollment[]
+}
+model GuardianLink {
+  accountId String @db.Uuid
+  studentId String @db.Uuid
+  verified Boolean @default(false)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  @@id([accountId, studentId])
+  @@index([studentId])
+}
+model SchoolClass {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  period String
+  enrollments Enrollment[]
+  teachings Teaching[]
+  events AgendaEvent[]
+  @@unique([name, period])
+}
+model Enrollment {
+  studentId String @db.Uuid
+  classId String @db.Uuid
+  active Boolean @default(true)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  @@id([studentId, classId])
+  @@index([classId])
+}
+model Teaching {
+  accountId String @db.Uuid
+  classId String @db.Uuid
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  @@id([accountId, classId])
+  @@index([classId])
+}
+model AgendaEvent {
+  id String @id @default(uuid()) @db.Uuid
+  classId String @db.Uuid
+  title String
+  description String
+  location String
+  startsAt DateTime @db.Timestamptz(3)
+  endsAt DateTime @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  @@index([classId, startsAt])
+}
+model Session {
+  id String @id @default(uuid()) @db.Uuid
+  tokenHash String @unique
+  csrfHash String
+  accountId String @db.Uuid
+  expiresAt DateTime
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  @@index([expiresAt])
+}

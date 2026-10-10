@@ -1,0 +1,14 @@
+.connected-shell { min-height: 100vh; background: var(--brand-paper, #f7f7f2); color: #102b3f; }
+.connected-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem max(1rem, calc((100vw - 1100px) / 2)); border-bottom: 1px solid #d5e3df; background: white; }
+.connected-header img { width: 220px; max-width: 45vw; height: auto; }
+.connected-main { max-width: 1000px; margin: auto; padding: 3rem 1.25rem; }
+.connected-main h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+.connected-note { font-size: .95rem; color: #435b63; margin: 1rem 0 2rem; }
+.connected-card { border: 1px solid #d5e3df; border-radius: 18px; background: white; padding: clamp(1rem, 3vw, 2rem); margin: 1.5rem 0; }
+.connected-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.connected-events { display: grid; gap: 1rem; margin-top: 1.5rem; }
+.connected-events article { border-left: 4px solid #16666b; background: #f3f8f7; padding: 1rem; border-radius: 0 10px 10px 0; overflow-wrap: anywhere; }
+.connected-events h3 { margin: .5rem 0; }
+.connected-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.connected-card select, .connected-card input, .connected-card textarea { max-width: 100%; min-width: 0; }
+@media(max-width: 600px) { .connected-dates { grid-template-columns: 1fr; } .connected-main { padding-top: 1.5rem; } }

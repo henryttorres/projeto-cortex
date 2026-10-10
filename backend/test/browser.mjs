@@ -1,0 +1,55 @@
+import { chromium, expect } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+const page = await context.newPage();
+const errors = [];
+page.on('pageerror', error => errors.push(error.message));
+const evidence = '../docs/evidencias/2026-10-10';
+await mkdir(evidence, { recursive: true });
+try {
+  await page.goto('http://127.0.0.1:5173');
+  await page.getByRole('button', { name: 'Já tenho cadastro', exact: true }).first().click();
+  await page.getByLabel('E-mail', { exact: true }).fill('ana@demo.cortex.test');
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.DEMO_PASSWORD);
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Olá, Ana.' })).toBeVisible();
+  await page.getByLabel('Estudante', { exact: true }).selectOption({ label: 'Lucas' });
+  await expect(page.getByRole('heading', { name: 'Oficina de perguntas e fontes' })).toBeVisible();
+  await page.screenshot({ path: `${evidence}/agenda-desktop.png`, fullPage: true });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Olá, Ana.' })).toBeVisible();
+  await page.getByLabel('Estudante', { exact: true }).selectOption({ label: 'Bia' });
+  await expect(page.getByRole('heading', { name: 'Planejamento de estudos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Oficina de perguntas e fontes' })).toHaveCount(0);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: `${evidence}/agenda-mobile.png`, fullPage: true });
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw new Error('Overflow horizontal em 390 px');
+  await page.getByRole('button', { name: 'Sair da conta' }).click();
+  await expect(page.getByRole('heading', { name: 'Já tenho cadastro' })).toBeVisible();
+  await page.getByLabel('E-mail', { exact: true }).fill('marina@demo.cortex.test');
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.DEMO_PASSWORD);
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Olá, Marina.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Publicar compromisso' })).toBeEnabled();
+  await page.getByLabel('Título', { exact: true }).fill('Encontro de revisão — teste visual');
+  await page.getByLabel('Descrição', { exact: true }).fill('Registro fictício criado pela verificação de interface.');
+  await page.getByLabel('Local', { exact: true }).fill('Sala Cortéx');
+  await page.getByLabel('Início', { exact: true }).fill('2026-10-16T14:00');
+  await page.getByLabel('Término', { exact: true }).fill('2026-10-16T15:00');
+  await page.getByRole('button', { name: 'Publicar compromisso' }).click();
+  await expect(page.getByText('Compromisso salvo.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Encontro de revisão — teste visual' })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Encontro de revisão — teste visual' })).toBeVisible();
+  await page.screenshot({ path: `${evidence}/professora-mobile.png`, fullPage: true });
+  if (errors.length) throw new Error(`Erros de página: ${errors.length}`);
+  console.log('UI: login, vínculos Lucas/Bia, recarga autenticada, logout, publicação persistida e mobile sem overflow aprovados.');
+} finally {
+  // Limpar somente o registro sintético específico deste teste.
+  const { PrismaClient } = await import('@prisma/client');
+  const db = new PrismaClient();
+  await db.agendaEvent.deleteMany({ where: { title: 'Encontro de revisão — teste visual', description: 'Registro fictício criado pela verificação de interface.' } });
+  await db.$disconnect();
+  await context.close(); await browser.close();
+}
