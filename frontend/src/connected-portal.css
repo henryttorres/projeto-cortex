@@ -11,4 +11,18 @@
 .connected-events h3 { margin: .5rem 0; }
 .connected-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .connected-card select, .connected-card input, .connected-card textarea { max-width: 100%; min-width: 0; }
+.connected-nav, .communication-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.connected-nav [aria-current="page"] { background: #102b3f; border-color: #102b3f; color: white; }
+.communication-panel h2 { margin: .5rem 0 0; }
+.communication-panel h2:focus-visible { outline: 2px solid #16666b; outline-offset: 6px; }
+.communication-list { display: grid; gap: 1rem; }
+.communication-list article { padding: 1.5rem; background: #f3f8f7; border-left: 4px solid #16666b; border-radius: 0 12px 12px 0; overflow-wrap: anywhere; }
+.communication-list h3 { margin: .75rem 0; }
+.communication-excerpt { margin-bottom: 1rem; }
+.communication-body { padding: 1.5rem 0; overflow-wrap: anywhere; }
+.communication-body p { white-space: pre-wrap; line-height: 1.8; }
+.communication-recipient { padding: 1rem; background: #e8f4ef; border-radius: 8px; }
+.communication-empty { padding: 2rem 0; }
+.communication-panel textarea { resize: vertical; }
+.communication-actions { margin-top: 1rem; }
 @media(max-width: 600px) { .connected-dates { grid-template-columns: 1fr; } .connected-main { padding-top: 1.5rem; } }

@@ -7,11 +7,13 @@ import helmet from 'helmet';
 import { AuthController, SessionGuard } from './auth';
 import { SchoolController } from './school';
 import { PrismaService } from './prisma.service';
+import { AccessService } from './access.service';
+import { CommunicationsController } from './communications';
 
 @Module({
   imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }])],
-  controllers: [AuthController, SchoolController],
-  providers: [PrismaService, SessionGuard, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  controllers: [AuthController, SchoolController, CommunicationsController],
+  providers: [PrismaService, SessionGuard, AccessService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 class AppModule {}
 

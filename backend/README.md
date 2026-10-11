@@ -1,4 +1,4 @@
-# API Cortéx — acesso e agenda
+# API Cortéx — acesso, agenda e comunicados
 
 Primeira integração funcional: NestJS/TypeScript, Prisma e PostgreSQL. Dados de
 demonstração são fictícios. Não é implantação de produção.
@@ -43,7 +43,7 @@ essa pasta, `.env` ou credenciais do administrador do banco.
 |---|---|---|
 | ana@demo.cortex.test | Responsável | Lucas e Bia, vínculos verificados |
 | lucas@demo.cortex.test | Aluno | Apenas Lucas / 2º A |
-| marina@demo.cortex.test | Professora | Apenas 2º A; leitura e criação de agenda |
+| marina@demo.cortex.test | Professora | Apenas 2º A; agenda e publicação de comunicados |
 | admin@demo.cortex.test | Administração | Turmas e estudantes deste banco |
 | suporte@demo.cortex.test | Suporte | Sem acesso acadêmico |
 
@@ -63,10 +63,22 @@ integrada; a tela antiga permanece explicitamente simulada.
 | GET | /classes | Docência da professora ou administração |
 | GET | /classes/:id/agenda | Turma autorizada |
 | POST | /classes/:id/agenda | Professor da turma ou admin; CSRF; validação |
+| GET | /students/:id/communications | Matrículas ativas do estudante autorizado |
+| GET | /students/:id/communications/:communicationId | Detalhe com a mesma verificação de vínculos |
+| GET | /classes/:id/communications | Lista da turma autorizada |
+| GET | /classes/:id/communications/:communicationId | Detalhe da turma autorizada |
+| POST | /classes/:id/communications | Professor da turma ou admin; sessão, origem e CSRF |
 
 Corpo da criação: `title`, `description`, `location`, `startsAt` e `endsAt` em ISO
 8601. O servidor e o banco exigem término posterior ao início. Campos extras são
 recusados. Registro indisponível e inexistente têm a mesma resposta 404.
+
+Publicação de comunicado: `publicationId` (UUID v4), `title` (3–120 caracteres)
+e `message` (3–5000 caracteres). Autoria e horário vêm do servidor. O UUID
+deve permanecer igual ao repetir a mesma tentativa: mesmo conteúdo, autor e
+turma retornam o registro já gravado; reutilização diferente retorna 409.
+A revisão é local, sem salvar rascunho. Publicações são somente texto e destinadas
+a uma turma por operação. Sem anexos, edição, exclusão, paginação ou recibo de leitura neste marco.
 
 ## Controles e limites
 
@@ -81,8 +93,8 @@ sessões expiradas, estratégia de rate limit distribuído se houver múltiplas
 instâncias, política de dados, backups e observabilidade. O rate limit atual é
 local à instância. Não há isolamento multiescola implementado.
 
-Interesse, comunicados, chamados e administração completa permanecem no portal
-de demonstração separado. Não misturar dados simulados com a agenda autenticada.
+Interesse, chamados e administração completa permanecem no portal
+de demonstração separado. Não misturar dados simulados com o portal autenticado.
 O assistente ainda é guiado por botões, sem LLM.
 
 ## Verificações
@@ -94,6 +106,10 @@ sintéticos e gera sessões de teste com expiração.
 `npm run test:ui`: requer front e API ativos, Google Chrome instalado; testa em
 Chrome headless separado do navegador do usuário e grava capturas em
 `docs/evidencias/2026-10-10`. A senha é lida do ambiente, não registrada em logs.
+
+`npm run test:communications:ui`: testa revisão, publicação, resposta perdida após
+gravação, reenvio sem duplicação, leitura por vínculo, recarga e layout mobile.
+Requer os mesmos serviços e dados fictícios. Registros criados são removidos ao final.
 
 Na raiz: `node security/purple-team/audit.mjs` e `pnpm --dir frontend build`.
 O auditor é heurístico; seu resultado não equivale a teste completo de segurança.

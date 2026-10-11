@@ -3,6 +3,7 @@ import { IsDateString, IsString, MaxLength, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { PrismaService } from './prisma.service';
 import { AuthRequest, SessionGuard } from './auth';
+import { AccessService } from './access.service';
 
 export class EventDto {
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
@@ -17,40 +18,26 @@ export class EventDto {
 
 @Controller() @UseGuards(SessionGuard)
 export class SchoolController {
-  constructor(private readonly db: PrismaService) {}
+  constructor(private readonly db: PrismaService, private readonly access: AccessService) {}
 
   @Get('students')
   async students(@Req() req: AuthRequest) {
-    const user = req.principal;
-    return this.db.student.findMany({
-      where: user.roles.includes('admin') ? {} : { OR: [
-        ...(user.roles.includes('student') ? [{ accountId: user.id }] : []),
-        ...(user.roles.includes('guardian') ? [{ guardians: { some: { accountId: user.id, verified: true } } }] : []),
-      ] },
-      select: { id: true, name: true, enrollments: { where: { active: true }, select: { schoolClass: { select: { id: true, name: true, period: true } } } } },
-      orderBy: { name: 'asc' },
-    });
+    return this.access.students(req.principal);
   }
 
   @Get('students/:id/agenda')
   async studentAgenda(@Param('id', ParseUUIDPipe) id: string, @Req() req: AuthRequest) {
-    const accessible = await this.students(req);
-    const student = accessible.find(s => s.id === id);
-    // Mesmo retorno para registro inexistente ou sem vínculo.
-    if (!student) throw new NotFoundException('Estudante não disponível para esta conta.');
-    return this.db.agendaEvent.findMany({ where: { classId: { in: student.enrollments.map(e => e.schoolClass.id) } }, orderBy: { startsAt: 'asc' } });
+    const ids = await this.access.studentClasses(id, req.principal);
+    return this.db.agendaEvent.findMany({ where: { classId: { in: ids } }, orderBy: { startsAt: 'asc' } });
   }
 
   @Get('classes')
   classes(@Req() req: AuthRequest) {
-    const user = req.principal;
-    if (!user.roles.some(r => r === 'teacher' || r === 'admin')) return [];
-    return this.db.schoolClass.findMany({ where: user.roles.includes('admin') ? {} : { teachings: { some: { accountId: user.id } } }, select: { id: true, name: true, period: true }, orderBy: { name: 'asc' } });
+    return this.access.classes(req.principal);
   }
 
   private async requireClass(id: string, req: AuthRequest) {
-    const classes = await this.classes(req);
-    if (!classes.some(c => c.id === id)) throw new NotFoundException('Turma não disponível para esta conta.');
+    await this.access.requireClass(id, req.principal);
   }
 
   @Get('classes/:id/agenda')

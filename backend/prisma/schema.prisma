@@ -23,6 +23,7 @@ model Account {
   guardians GuardianLink[]
   teachings Teaching[]
   sessions Session[]
+  communications Communication[]
   createdAt DateTime @default(now())
 }
 model AccountRole {
@@ -55,6 +56,7 @@ model SchoolClass {
   enrollments Enrollment[]
   teachings Teaching[]
   events AgendaEvent[]
+  communications CommunicationClass[]
   @@unique([name, period])
 }
 model Enrollment {
@@ -93,4 +95,22 @@ model Session {
   expiresAt DateTime
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   @@index([expiresAt])
+}
+model Communication {
+  id String @id @default(uuid()) @db.Uuid
+  authorId String @db.Uuid
+  title String @db.VarChar(120)
+  message String @db.VarChar(5000)
+  publishedAt DateTime @default(now()) @db.Timestamptz(3)
+  author Account @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  classes CommunicationClass[]
+  @@index([publishedAt, id])
+}
+model CommunicationClass {
+  communicationId String @db.Uuid
+  classId String @db.Uuid
+  communication Communication @relation(fields: [communicationId], references: [id], onDelete: Cascade)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  @@id([communicationId, classId])
+  @@index([classId])
 }

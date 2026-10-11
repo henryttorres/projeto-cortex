@@ -10,7 +10,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx --env-file=.env prisma/seed.ts",
     "test": "node --env-file=.env --test test/integration.test.mjs",
-    "test:ui": "node --env-file=.env test/browser.mjs"
+    "test:ui": "node --env-file=.env test/browser.mjs",
+    "test:communications:ui": "node --env-file=.env test/communications-browser.mjs"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",
