@@ -54,3 +54,9 @@
 .metric-bar { background: #16666b; color: white; min-width: 2rem; padding: .25rem .5rem; border-radius: 4px; }
 @media(max-width: 700px) { .metrics-grid { grid-template-columns: 1fr; } }
 @media(max-width: 600px) { .connected-dates { grid-template-columns: 1fr; } .connected-main { padding-top: 1.5rem; } }
+
+.service-teams { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+.service-teams article { border: 1px solid #b9d2d0; border-radius: 12px; padding: 1rem; background: #f2f8f7; }
+.service-desk form { margin: 1.5rem 0; }
+.service-desk code { overflow-wrap: anywhere; }
+.service-desk select { max-width: 100%; }

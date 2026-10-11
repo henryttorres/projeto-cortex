@@ -1,3 +1,5 @@
+ > Referência provisória: primeiro commit 27/09/2026 = dia 1; 11/10 = dia 15; dia 90 = 25/12. Confirmar data acadêmica oficial. Equipes/escopos/transferência e secretaria já entregues; próximo marco: políticas de SLA/backlog e gestão completa de funcionários. [Evidências](equipes-secretaria-2026-10-11.md).
+
 # Plano de até 90 dias
 
 Atualização: 11/10/2026. Janelas relativas ao início pactuado; data oficial precisa ser confirmada. Fases se sobrepõem, pois somar os máximos originais excederia 90 dias.
@@ -14,13 +16,13 @@ Responsabilidades ampliadas são propostas para os seis integrantes, ainda não 
 
 ## Próxima sequência
 
-1. Confirmar gestão exclusiva ADMIN versus ações operacionais dos demais.
-2. Implementar [equipes/permissões](equipes-entidades-permissoes.md), migração e isolamento.
-3. Construir gestão/consulta/transferência; validar desktop/mobile.
+1. Concluído: gestão ADMIN e operações por perfil confirmadas.
+2. Concluído: equipes, migração e isolamento testados.
+3. Concluído: gestão de vínculos, consulta, transferência e secretaria validadas; convites de funcionários pendentes.
 4. Implementar SLA aberto e metas ADMIN versionadas.
 5. Documentar evidências em prod; promover após validação.
 6. Priorizar recuperação de senha/captação, fechar escopo de IA e preparar deploy.
 
 ## Resumo para o time
 
-Frontend com identidade e API persistindo login, agenda, comunicados e suporte estão construídos. Última entrega técnica: atribuição automática com disponibilidade e métricas dos ciclos encerrados (SLA inicial/resolução, TMA, CSAT e participação). Próximo marco: equipes com consulta restrita, gestão ADMIN e transferência auditada. Essa camada ainda não está implementada. A organização documental prepara a evolução sem antecipar sua conclusão.
+Frontend com identidade e API persistindo login, agenda, comunicados e suporte estão construídos. Última entrega técnica: atribuição automática com disponibilidade e métricas dos ciclos encerrados (SLA inicial/resolução, TMA, CSAT e participação). Próximo marco: equipes com consulta restrita, gestão ADMIN e transferência auditada. Essa camada foi implementada em 11/10, com os limites do relatório atual. A organização documental prepara a evolução sem antecipar sua conclusão.

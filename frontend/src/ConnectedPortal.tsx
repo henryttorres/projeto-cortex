@@ -1,3 +1,4 @@
+import ServiceDesk from './ServiceDesk';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import './connected-portal.css';
 
@@ -11,7 +12,7 @@ type Student = { id: string; name: string; enrollments: { schoolClass: SchoolCla
 type SchoolClass = { id: string; name: string; period: string };
 type AgendaItem = { id: string; title: string; description: string; location: string; startsAt: string; endsAt: string };
 
-const roleLabels: Record<string, string> = { guardian: 'Responsável', student: 'Aluno', teacher: 'Professor', admin: 'Administração', support: 'Atendente', supervisor: 'Supervisor', coordinator: 'Coordenador' };
+const roleLabels: Record<string, string> = { guardian: 'Responsável', student: 'Aluno', teacher: 'Professor', admin: 'Administração', support: 'Atendente', supervisor: 'Supervisor', coordinator: 'Coordenador', director: 'Diretor' };
 export default function ConnectedPortal({ user, onLogout }: { user: User; onLogout: () => void }) {
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
@@ -22,7 +23,7 @@ export default function ConnectedPortal({ user, onLogout }: { user: User; onLogo
   const [notice, setNotice] = useState('');
   const [saving, setSaving] = useState(false);
   const [refresh, setRefresh] = useState(0);
-  const [section, setSection] = useState<'agenda' | 'communications' | 'support' | 'metrics'>(user.roles.some(r => ['support', 'supervisor', 'coordinator'].includes(r)) ? 'support' : 'agenda');
+  const [section, setSection] = useState<'agenda' | 'communications' | 'support' | 'metrics' | 'service'>(user.roles.some(r => ['support', 'supervisor', 'coordinator', 'director'].includes(r)) ? 'support' : 'agenda');
   const [draftActive, setDraftActive] = useState(false);
   const requestId = useRef(0);
   const canWrite = user.roles.some(r => r === 'teacher' || r === 'admin');
@@ -83,10 +84,12 @@ export default function ConnectedPortal({ user, onLogout }: { user: User; onLogo
         {academicAccess && <button className="button button--secondary" aria-current={section === 'agenda' ? 'page' : undefined} disabled={draftActive} onClick={() => setSection('agenda')}>Agenda</button>}
         {academicAccess && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'communications' ? 'page' : undefined} onClick={() => setSection('communications')}>Comunicados</button>}
         <button className="button button--secondary" disabled={draftActive} aria-current={section === 'support' ? 'page' : undefined} onClick={() => setSection('support')}>Atendimento</button>
-        {user.roles.some(r => ['support', 'supervisor', 'coordinator', 'admin'].includes(r)) && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'metrics' ? 'page' : undefined} onClick={() => setSection('metrics')}>Indicadores</button>}
+        {user.roles.some(r => ['support', 'supervisor', 'coordinator', 'director', 'admin'].includes(r)) && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'metrics' ? 'page' : undefined} onClick={() => setSection('metrics')}>Indicadores</button>}
+        <button className="button button--secondary" disabled={draftActive} aria-current={section === 'service' ? 'page' : undefined} onClick={() => setSection('service')}>Secretaria e equipes</button>
       </nav>
       {draftActive && <p role="status">Conclua ou descarte o rascunho antes de navegar ou sair da conta.</p>}
       {user.roles.includes('support') && <Availability onExpired={onLogout} />}
+      {section === 'service' && <ServiceDesk user={user} onDraftChange={setDraftActive} onExpired={onLogout} />}
       {section === 'metrics' && <Operations onExpired={onLogout} />}
       {['agenda', 'communications'].includes(section) && <section className="connected-card" aria-label="Contexto acadêmico">
         {contextOptions.length > 0 && <div className="field"><label htmlFor="real-context">{canWrite ? 'Turma' : 'Estudante'}</label><select id="real-context" disabled={draftActive} value={selected} onChange={event => { setSelected(event.target.value); setNotice(''); }}>{contextOptions.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}

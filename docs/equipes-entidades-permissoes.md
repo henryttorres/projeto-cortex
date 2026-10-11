@@ -1,3 +1,5 @@
+> Atualização: equipes e secretaria implementadas em 11/10. O desenho abaixo é a proposta histórica; Employee foi representado por Account + TeamMember e transferências por TicketEntry. Estado, matriz aplicada e limitações em [relatório da entrega](equipes-secretaria-2026-10-11.md).
+
 # Entidades, equipes e permissões
 
 11/10/2026. **Modelo atual confirmado; evolução ainda não implementada.**
@@ -72,7 +74,7 @@ Proposta para transferência: preservar início/metas do ciclo e atribuir result
 | Responsável | Alunos com vínculo verificado e próprios chamados | Negada |
 | Aluno | Próprios dados/chamados | Negada |
 
-**Confirmação pendente:** exclusividade administrativa também retira ações operacionais existentes? Hoje atendente responde/encerra, solicitante abre/responde/avalia, professor publica para sua turma. Não alterar silenciosamente esses fluxos. Esta tabela é requisito futuro, não garantia atual: supervisor/coordenador ainda têm alcance institucional no código.
+**Confirmação recebida em 11/10:** gestão administrativa exclusiva ADMIN, mantendo operações por papel. A pergunta histórica era: exclusividade administrativa também retira ações operacionais existentes? Hoje atendente responde/encerra, solicitante abre/responde/avalia, professor publica para sua turma. Não alterar silenciosamente esses fluxos. Esta tabela é requisito futuro, não garantia atual: supervisor/coordenador ainda têm alcance institucional no código.
 
 ## Aceite da implementação
 

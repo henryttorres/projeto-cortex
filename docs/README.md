@@ -1,6 +1,6 @@
 # Documentação do Cortéx
 
-Atualização: 11/10/2026. Implementação conferida no commit `03b15d5`.
+Atualização: 11/10/2026. Implementação ampliada com equipes e secretaria nesta entrega.
 
 ## Ordem de leitura
 
@@ -25,4 +25,4 @@ Atualização: 11/10/2026. Implementação conferida no commit `03b15d5`.
 
 Datas identificam quando cada verificação ocorreu. Capturas ficam em `evidencias/`. Propostas não comprovam funcionalidades entregues. O [schema Prisma](../backend/prisma/schema.prisma) e migrações definem o banco vigente; SQL inicial em `backend/bancodedados` é histórico e não deve ser aplicado sobre o banco integrado.
 
-A restrição de supervisor/coordenador por equipe ainda precisa ser implementada e testada. Os relatórios anteriores de gestão são propostas quando divergem do código atual.
+Equipes, isolamento de gestores e secretaria foram implementados e testados: [relatório vigente](equipes-secretaria-2026-10-11.md). Propostas anteriores ficam como histórico quando divergirem do modelo aplicado.

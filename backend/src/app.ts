@@ -1,3 +1,4 @@
+import { TeamsController, ServiceController } from './teams';
 import 'reflect-metadata';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_GUARD, NestFactory } from '@nestjs/core';
@@ -14,7 +15,7 @@ import { OperationsController } from './operations';
 
 @Module({
   imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }])],
-  controllers: [AuthController, SchoolController, CommunicationsController, TicketsController, OperationsController],
+  controllers: [AuthController, SchoolController, CommunicationsController, TicketsController, OperationsController, TeamsController, ServiceController],
   providers: [PrismaService, SessionGuard, AccessService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 class AppModule {}

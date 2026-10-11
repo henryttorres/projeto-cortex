@@ -22,10 +22,12 @@ before(async () => {
     const agent = request.agent(server);
     const res = await agent.post('/api/auth/login').set('Origin', origin).send({ email: account.email, password }).expect(201);
     actors[name] = { agent, csrf: res.body.csrfToken, id: account.id };
+    if (role === 'support') { const team = await db.supportTeam.findFirstOrThrow({ where: { isDefault: true } }); await db.teamMember.create({ data: { teamId: team.id, accountId: account.id, role } }); }
   }
 });
 after(async () => {
   await db.ticket.deleteMany({ where: { id: { in: tickets } } });
+  await db.teamMember.deleteMany({ where: { accountId: { in: accounts } } });
   await db.account.deleteMany({ where: { id: { in: accounts } } });
   await app?.close(); await db.$disconnect();
 });

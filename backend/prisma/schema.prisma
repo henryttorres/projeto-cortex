@@ -13,6 +13,7 @@ enum Role {
   support
   supervisor
   coordinator
+  director
 }
 model Account {
   id String @id @default(uuid()) @db.Uuid
@@ -29,6 +30,7 @@ model Account {
   tickets Ticket[] @relation("Requester")
   assignedTickets Ticket[] @relation("Assignee")
   ticketEntries TicketEntry[]
+  memberships TeamMember[]
   supportReadyUntil DateTime?
   resolvedCycles TicketCycle[]
   createdAt DateTime @default(now())
@@ -127,6 +129,10 @@ enum TicketStatus {
   resolved
 }
 enum TicketAction {
+  transfer
+  escalate
+  decision
+  registration
   assigned
   opened
   reply
@@ -135,6 +141,12 @@ enum TicketAction {
   reopen
 }
 model Ticket {
+  teamId String? @db.Uuid
+  team SupportTeam? @relation(fields: [teamId], references: [id], onDelete: Restrict)
+  escalationRole Role?
+  escalationDueAt DateTime? @db.Timestamptz(3)
+  escalationPending Boolean @default(false)
+  registeredStudentId String? @unique @db.Uuid
   id String @id @default(uuid()) @db.Uuid
   requesterId String @db.Uuid
   assigneeId String? @db.Uuid
@@ -163,6 +175,8 @@ model TicketEntry {
   @@index([ticketId, createdAt, id])
 }
 model TicketCycle {
+  teamId String? @db.Uuid
+  team SupportTeam? @relation(fields: [teamId], references: [id], onDelete: Restrict)
   id String @id @default(uuid()) @db.Uuid
   ticketId String @db.Uuid
   startedAt DateTime @default(now()) @db.Timestamptz(3)
@@ -178,4 +192,23 @@ model TicketCycle {
   resolver Account? @relation(fields: [resolverId], references: [id], onDelete: Restrict)
   @@index([ticketId, startedAt])
   @@index([closedAt, resolverId])
+}
+
+model SupportTeam {
+  id String @id @default(uuid()) @db.Uuid
+  name String @unique @db.VarChar(100)
+  active Boolean @default(true)
+  isDefault Boolean @default(false)
+  members TeamMember[]
+  tickets Ticket[]
+  cycles TicketCycle[]
+}
+model TeamMember {
+  teamId String @db.Uuid
+  accountId String @db.Uuid
+  role Role
+  team SupportTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  @@id([teamId, accountId])
+  @@index([accountId])
 }

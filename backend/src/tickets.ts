@@ -27,7 +27,7 @@ class ActionDto {
   @IsString() @MaxLength(5000) message!: string;
 }
 class RatingDto { @IsUUID('4') cycleId!: string; @IsInt() @Min(1) @Max(5) score!: number; }
-const summary = { id: true, title: true, status: true, version: true, createdAt: true, updatedAt: true, requester: { select: { id: true, name: true } }, assignee: { select: { id: true, name: true } } } satisfies Prisma.TicketSelect;
+const summary = { teamId: true, escalationRole: true, escalationDueAt: true, escalationPending: true, registeredStudentId: true, id: true, title: true, status: true, version: true, createdAt: true, updatedAt: true, requester: { select: { id: true, name: true } }, assignee: { select: { id: true, name: true } } } satisfies Prisma.TicketSelect;
 const missing = () => new NotFoundException('Chamado não disponível para esta conta.');
 
 @Controller('tickets') @UseGuards(SessionGuard)
@@ -63,7 +63,7 @@ export class TicketsController {
         const previous = await tx.ticket.findUnique({ where: { id: dto.requestId } });
         if (previous) {
           if (previous.requesterId !== req.principal.id || previous.title !== dto.title || previous.description !== dto.description) throw new ConflictException('Identificador já utilizado.');
-        } else await tx.ticket.create({ data: { id: dto.requestId, requesterId: req.principal.id, title: dto.title, description: dto.description, cycles: { create: {} }, entries: { create: { authorId: req.principal.id, action: 'opened', message: '' } } } });
+        } else { const team = await tx.supportTeam.findFirst({ where: { active: true, isDefault: true }, orderBy: { id: 'asc' } }); await tx.ticket.create({ data: { id: dto.requestId, requesterId: req.principal.id, title: dto.title, description: dto.description, teamId: team?.id, cycles: { create: { teamId: team?.id } }, entries: { create: { authorId: req.principal.id, action: 'opened', message: '' } } } }); }
         await distribute(tx);
         return tx.ticket.findUniqueOrThrow({ where: { id: dto.requestId }, select: summary });
       });
@@ -89,11 +89,12 @@ export class TicketsController {
             if (prior.ticketId !== id || prior.authorId !== user.id || prior.action !== dto.action || prior.message !== dto.message) throw new ConflictException('Identificador de ação já utilizado.');
             return { id, version: ticket.version };
           }
-          const operator = staff(user) && (ticket.assigneeId === user.id || manager(user));
+          const operator = (user.roles.includes('support') && ticket.assigneeId === user.id) || user.roles.includes('admin');
           let status = ticket.status;
           let assigneeId = ticket.assigneeId;
           if (dto.action === 'claim') {
-            if (!staff(user)) throw new ForbiddenException('Somente a equipe pode assumir chamados.');
+            if (!user.roles.some(r => ['support', 'admin'].includes(r))) throw new ForbiddenException('Somente a equipe pode assumir chamados.');
+            if (!user.roles.includes('admin') && (ticket.requesterId === user.id || !ticket.teamId || !await tx.teamMember.findFirst({ where: { teamId: ticket.teamId, accountId: user.id, role: 'support', team: { active: true } } }))) throw new ForbiddenException('Chamado fora da sua equipe.');
             if (ticket.assigneeId || ticket.status !== 'open') throw new ConflictException('Este chamado já foi assumido ou encerrado. Atualize o histórico.');
             assigneeId = user.id; status = 'in_progress';
           } else if (dto.action === 'reply') {
@@ -102,6 +103,7 @@ export class TicketsController {
           } else if (dto.action === 'resolve') {
             if (!operator) throw new ForbiddenException('Somente o atendente responsável ou administração pode encerrar.');
             if (ticket.status !== 'in_progress') throw new ConflictException('Somente chamados em atendimento podem ser encerrados.');
+            if (ticket.escalationPending) throw new ConflictException('Aguarde a decisão do setor responsável.');
             status = 'resolved';
           } else {
             if (ticket.requesterId !== user.id && !operator) throw new ForbiddenException('Esta conta não pode reabrir o chamado.');
@@ -119,7 +121,7 @@ export class TicketsController {
           } else if (cycle && dto.action === 'resolve') {
             await tx.ticketCycle.update({ where: { id: cycle.id }, data: { closedAt: now, resolverId: user.id } });
           }
-          if (dto.action === 'reopen') await tx.ticketCycle.create({ data: { ticketId: id, startedAt: now } });
+          if (dto.action === 'reopen') await tx.ticketCycle.create({ data: { ticketId: id, startedAt: now, teamId: ticket.teamId } });
           if (dto.action === 'resolve' || dto.action === 'reopen') await distribute(tx);
           return { id, version: dto.version + 1 };
         }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });

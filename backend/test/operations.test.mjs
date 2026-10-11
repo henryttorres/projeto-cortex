@@ -26,6 +26,8 @@ before(async () => {
     const res = await agent.post('/api/auth/login').set('Origin', process.env.WEB_ORIGIN).send({ email: account.email, password }).expect(201);
     actors[name] = { agent, id: account.id, csrf: res.body.csrfToken };
   }
+  const team = await db.supportTeam.create({ data: { name: 'Equipe de teste', isDefault: true } });
+  for (const [name, role] of [['agent1','support'],['agent2','support'],['boss','supervisor'],['coordinator','coordinator']]) await db.teamMember.create({ data: { teamId: team.id, accountId: actors[name].id, role } });
 });
 after(async () => {
   await app?.close(); await db?.$disconnect(); process.env.DATABASE_URL = original;

@@ -127,3 +127,9 @@ Revisão e limitações: `docs/seguranca-atendimento-2026-10-10.md`.
 
 Na raiz: `node security/purple-team/audit.mjs` e `pnpm --dir frontend build`.
 O auditor é heurístico; seu resultado não equivale a teste completo de segurança.
+
+## Equipes e secretaria — 11/10
+
+Contas adicionais: diretor@demo.cortex.test (Centro/Norte) e atendente2@demo.cortex.test (Norte), mesma senha fictícia do seed local. Supervisor/coordenador limitados ao Centro. Use `npm run db:migrate`, `npm run db:seed`, `npm run build` e reinicie API após atualizar.
+
+Endpoints e permissões: [relatório](../docs/equipes-secretaria-2026-10-11.md). Scripts de validação: `npm run test:teams` e `npm run test:teams:ui`. Legados sem equipe são visíveis ao solicitante/ADMIN; transferir os abertos pelo ADMIN quando necessário.

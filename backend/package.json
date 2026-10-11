@@ -14,6 +14,8 @@
     "test:communications:ui": "node --env-file=.env test/communications-browser.mjs",
     "test:support": "node --env-file=.env --test test/tickets.test.mjs",
     "test:support:ui": "node --env-file=.env test/tickets-browser.mjs",
+    "test:teams": "node --env-file=.env --test test/teams.test.mjs",
+    "test:teams:ui": "node --env-file=.env test/teams-browser.mjs",
     "test:operations": "node --env-file=.env --test test/operations.test.mjs"
   },
   "dependencies": {

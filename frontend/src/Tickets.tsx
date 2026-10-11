@@ -7,10 +7,10 @@ type Detail = { ticket: Ticket; cycle: { id: string; closedAt: string | null; sc
 type List = { items: Ticket[]; total: number; page: number; pageSize: number };
 type Pending = { path: string; body: object };
 const statuses: Record<string, string> = { open: 'Aberto', in_progress: 'Em atendimento', resolved: 'Encerrado' };
-const actions: Record<string, string> = { assigned: 'Recebeu por distribuição automática', opened: 'Abriu o chamado', claim: 'Assumiu o atendimento', reply: 'Enviou uma resposta', resolve: 'Encerrou o chamado', reopen: 'Reabriu o chamado' };
+const actions: Record<string, string> = { transfer: 'Transferiu a equipe', escalate: 'Encaminhou ao setor', decision: 'Registrou decisão', registration: 'Cadastrou aluno pendente', assigned: 'Recebeu por distribuição automática', opened: 'Abriu o chamado', claim: 'Assumiu o atendimento', reply: 'Enviou uma resposta', resolve: 'Encerrou o chamado', reopen: 'Reabriu o chamado' };
 
 export default function Tickets({ user, onSessionExpired, onDraftChange }: { user: User; onSessionExpired: () => void; onDraftChange: (value: boolean) => void }) {
-  const isManager = user.roles.some(r => ['admin', 'supervisor', 'coordinator'].includes(r));
+  const isManager = user.roles.some(r => ['admin'].includes(r));
   const isStaff = isManager || user.roles.includes('support');
   const [view, setView] = useState<'list' | 'new' | 'review' | 'detail'>('list');
   const [list, setList] = useState<List>({ items: [], total: 0, page: 1, pageSize: 20 });

@@ -102,7 +102,7 @@ try {
   await login('supervisor');
   await page.getByRole('button', { name: 'Indicadores', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Indicadores de atendimentos encerrados' })).toBeVisible();
-  await expect(page.getByText('Visão da operação: todos os ciclos da instituição.')).toBeVisible();
+  await expect(page.getByText('Visão das equipes vinculadas ao seu perfil.')).toBeVisible();
   await expect(page.locator('.metrics-table tbody')).toContainText('Suporte');
   await page.screenshot({ path: `${evidence}/indicadores-mobile.png`, fullPage: true });
   if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw new Error('Overflow dos indicadores mobile');

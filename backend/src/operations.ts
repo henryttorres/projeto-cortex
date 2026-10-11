@@ -3,7 +3,7 @@ import { IsBoolean, IsIn, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AuthRequest, SessionGuard } from './auth';
 import { PrismaService } from './prisma.service';
-import { distribute, manager, serial, staff } from './routing';
+import { distribute, manager, serial, staff, teamScope } from './routing';
 
 class AvailabilityDto { @IsBoolean() available!: boolean; }
 class PeriodDto { @IsOptional() @Type(() => Number) @IsIn([7, 30, 90]) days = 30; }
@@ -47,7 +47,7 @@ export class OperationsController {
     if (!staff(user)) throw new ForbiddenException('Indicadores exclusivos da operação.');
     const generatedAt = new Date();
     const from = new Date(generatedAt.getTime() - query.days * 86400000);
-    const where = { closedAt: { gte: from, lte: generatedAt }, ...(manager(user) ? {} : { resolverId: user.id }) };
+    const where = { closedAt: { gte: from, lte: generatedAt }, ...(user.roles.includes('admin') ? {} : manager(user) ? { team: { is: teamScope(user) } } : { resolverId: user.id }) };
     if (await this.db.ticketCycle.count({ where }) > 10000) throw new BadRequestException('Volume acima do limite desta versão. Selecione período menor.');
     const cycles = await this.db.ticketCycle.findMany({ where, include: { resolver: { select: { id: true, name: true } }, ticket: { select: { requesterId: true } } } });
     const aggregate = (rows: typeof cycles) => {
@@ -63,7 +63,7 @@ export class OperationsController {
         participation: percent(rated.length, rows.filter(c => c.resolverId !== c.ticket.requesterId).length) };
     };
     const groups = [...new Set(cycles.map(c => c.resolverId).filter(Boolean))];
-    return { generatedAt, from, days: query.days, scope: manager(user) ? 'institution' : 'personal', policy: 'Demonstração · Bahia · seg–sex 09–17h · sem feriados · SLA 4h/16h úteis',
+    return { generatedAt, from, days: query.days, scope: user.roles.includes('admin') ? 'institution' : manager(user) ? 'team' : 'personal', policy: 'Demonstração · Bahia · seg–sex 09–17h · sem feriados · SLA 4h/16h úteis',
       summary: aggregate(cycles), agents: groups.map(id => ({ id, name: cycles.find(c => c.resolverId === id)!.resolver!.name, ...aggregate(cycles.filter(c => c.resolverId === id)) })),
       trend: Array.from({ length: query.days + 1 }, (_, i) => {
         const date = new Date(from.getTime() + i * 86400000).toLocaleDateString('en-CA', { timeZone: 'America/Bahia' });

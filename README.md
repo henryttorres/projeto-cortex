@@ -8,8 +8,9 @@ React/TypeScript/Vite com identidade visual aplicada, API NestJS/Prisma e Postgr
 
 Atendimento: distribuição automática por disponibilidade e menor carga, histórico, reabertura, CSAT e indicadores de ciclos encerrados. Metas demonstrativas: primeira resposta em 4h úteis e resolução em 16h úteis, seg–sex 09–17h, Bahia, sem feriados.
 
-**Ainda não implementado:** equipes/funcionários, transferência administrativa, alcance por equipe de supervisor/coordenador, SLA dos chamados abertos e metas editáveis. Atualmente supervisor/coordenador têm alcance institucional no código. A nova política ADMIN está especificada, mas não aplicada. Sem deploy público.
+**Nova entrega:** equipes Centro/Norte, hierarquia com diretor, consultas e métricas por equipe, cadastro de aluno com vínculo pendente de aprovação ADMIN, encaminhamento de dois dias úteis e transferência administrativa. [Relatório e limites](docs/equipes-secretaria-2026-10-11.md).
 
+Pendente: metas/feriados editáveis, SLA de todo o backlog, convites de funcionários e documentos oficiais. A secretaria emite registros textuais demonstrativos. Sem deploy público.
 ## Guias
 
 | Guia | Conteúdo |
@@ -42,6 +43,6 @@ Credenciais fictícias somente em `.local-data/ACESSOS.md`. Não publicar `.env`
 
 Em `backend`: `npm run build`, `npm test`, `npm run test:support`, `npm run test:operations`. Interface com serviços ativos: `npm run test:ui`, `npm run test:communications:ui`, `npm run test:support:ui`. Frontend pela raiz: `pnpm --dir frontend build`.
 
-O relatório anterior registra 27 testes HTTP/operação e três suítes de interface aprovados em 11/10. Isso não substitui testar novas alterações. A organização documental não altera o comportamento da aplicação.
+Esta entrega passou em 33 testes HTTP/operação/hierarquia e quatro suítes de interface. Consulte o relatório para cobertura e limitações. Novos comandos: `npm run test:teams` e `npm run test:teams:ui` em backend.
 
 IA externa, recuperação de senha, captação persistida e deploy permanecem pendentes. O guia interativo não é IA integrada. O [README anterior](docs/readme-historico-2026-10-11.md) foi preservado como registro histórico; o schema Prisma prevalece sobre modelos antigos.
