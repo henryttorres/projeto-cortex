@@ -3,14 +3,15 @@ import { api, ApiError, User } from './api';
 
 type Ticket = { id: string; title: string; description?: string; status: string; version: number; updatedAt: string; requester: { id: string; name: string }; assignee: { id: string; name: string } | null };
 type Entry = { id: string; action: string; message: string; createdAt: string; author: { name: string } };
-type Detail = { ticket: Ticket; entries: Entry[]; page: number; pageSize: number; total: number };
+type Detail = { ticket: Ticket; cycle: { id: string; closedAt: string | null; score: number | null } | null; entries: Entry[]; page: number; pageSize: number; total: number };
 type List = { items: Ticket[]; total: number; page: number; pageSize: number };
 type Pending = { path: string; body: object };
 const statuses: Record<string, string> = { open: 'Aberto', in_progress: 'Em atendimento', resolved: 'Encerrado' };
-const actions: Record<string, string> = { opened: 'Abriu o chamado', claim: 'Assumiu o atendimento', reply: 'Enviou uma resposta', resolve: 'Encerrou o chamado', reopen: 'Reabriu o chamado' };
+const actions: Record<string, string> = { assigned: 'Recebeu por distribuição automática', opened: 'Abriu o chamado', claim: 'Assumiu o atendimento', reply: 'Enviou uma resposta', resolve: 'Encerrou o chamado', reopen: 'Reabriu o chamado' };
 
 export default function Tickets({ user, onSessionExpired, onDraftChange }: { user: User; onSessionExpired: () => void; onDraftChange: (value: boolean) => void }) {
-  const isStaff = user.roles.some(r => r === 'support' || r === 'admin');
+  const isManager = user.roles.some(r => ['admin', 'supervisor', 'coordinator'].includes(r));
+  const isStaff = isManager || user.roles.includes('support');
   const [view, setView] = useState<'list' | 'new' | 'review' | 'detail'>('list');
   const [list, setList] = useState<List>({ items: [], total: 0, page: 1, pageSize: 20 });
   const [filter, setFilter] = useState('');
@@ -34,7 +35,7 @@ export default function Tickets({ user, onSessionExpired, onDraftChange }: { use
   const busyRef = useRef(false);
   const drafting = view === 'new' || view === 'review' || !!message || !!pending;
   const ticket = detail?.ticket;
-  const operator = isStaff && (ticket?.assignee?.id === user.id || user.roles.includes('admin'));
+  const operator = isStaff && (ticket?.assignee?.id === user.id || isManager);
   const canReply = ticket && ticket.status !== 'resolved' && (ticket.requester.id === user.id || operator);
   function fail(err: unknown) {
     if (err instanceof ApiError && err.status === 401) { onSessionExpired(); return; }
@@ -42,6 +43,7 @@ export default function Tickets({ user, onSessionExpired, onDraftChange }: { use
   }
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   useEffect(() => { heading.current?.focus(); }, [view, id, reviewAction]);
+  useEffect(() => { if (view !== 'list') return; const timer = window.setInterval(() => setRefresh(n => n + 1), 30000); return () => clearInterval(timer); }, [view]);
   useEffect(() => {
     onDraftChange(drafting);
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
@@ -108,6 +110,7 @@ export default function Tickets({ user, onSessionExpired, onDraftChange }: { use
       {loading ? <p role="status">Carregando histórico…</p> : detail && ticket && <>
         <article className="communication-body"><span className={`ticket-status ticket-status--${ticket.status}`}>{statuses[ticket.status]}</span><h3>{ticket.title}</h3><small>Protocolo: {ticket.id}</small><p>{ticket.description}</p><p>Solicitante: {ticket.requester.name} · {ticket.assignee ? `Atendente: ${ticket.assignee.name}` : 'Aguardando equipe'}</p></article>
         <h3>Histórico do atendimento</h3><ol className="ticket-timeline">{detail.entries.map(entry => <li key={entry.id}><p className="eyebrow">{entry.author.name} · {actions[entry.action]}</p><time dateTime={entry.createdAt}>{date(entry.createdAt)}</time>{entry.message && <p className="ticket-message">{entry.message}</p>}</li>)}</ol>
+        {detail.cycle?.closedAt && ticket.requester.id === user.id && !isStaff && <section className="connected-card" aria-label="Avaliação do atendimento"><h3>Como você avalia este atendimento?</h3>{detail.cycle.score !== null ? <p>Obrigado! Nota registrada: {detail.cycle.score}/5.</p> : <><p>Avaliação opcional: 1 muito insatisfeito, 5 muito satisfeito.</p><div className="communication-actions">{[1, 2, 3, 4, 5].map(score => <button className="button button--secondary" disabled={busy} key={score} aria-label={`Avaliar com nota ${score}`} onClick={async () => { setBusy(true); setError(''); try { await api(`/tickets/${ticket.id}/rating`, { method: 'POST', body: JSON.stringify({ cycleId: detail.cycle!.id, score }) }); setRefresh(n => n + 1); } catch (err) { fail(err); } finally { setBusy(false); } }}>{score}</button>)}</div></>}</section>}
         <div className="communication-actions"><button className="button button--secondary" disabled={entryPage <= 1} onClick={() => setEntryPage(p => p - 1)}>Registros mais recentes</button><span>Página {entryPage}</span><button className="button button--secondary" disabled={entryPage * 30 >= detail.total} onClick={() => setEntryPage(p => p + 1)}>Histórico anterior</button></div>
         <div className="communication-actions">
           {isStaff && ticket.status === 'open' && !ticket.assignee && <button className="button button--primary" disabled={busy || !!pending} onClick={() => action('claim')}>Assumir chamado</button>}

@@ -4,6 +4,7 @@ import { IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLeng
 import { Prisma, TicketStatus } from '@prisma/client';
 import { AuthRequest, Principal, SessionGuard } from './auth';
 import { PrismaService } from './prisma.service';
+import { distribute, manager, serial, staff, ticketScope as scope } from './routing';
 
 class PageDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(10000) page = 1;
@@ -25,9 +26,8 @@ class ActionDto {
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   @IsString() @MaxLength(5000) message!: string;
 }
+class RatingDto { @IsUUID('4') cycleId!: string; @IsInt() @Min(1) @Max(5) score!: number; }
 const summary = { id: true, title: true, status: true, version: true, createdAt: true, updatedAt: true, requester: { select: { id: true, name: true } }, assignee: { select: { id: true, name: true } } } satisfies Prisma.TicketSelect;
-const staff = (user: Principal) => user.roles.some(role => role === 'support' || role === 'admin');
-const scope = (user: Principal): Prisma.TicketWhereInput => staff(user) ? {} : { requesterId: user.id };
 const missing = () => new NotFoundException('Chamado não disponível para esta conta.');
 
 @Controller('tickets') @UseGuards(SessionGuard)
@@ -52,13 +52,21 @@ export class TicketsController {
       this.db.ticketEntry.findMany({ where: { ticketId: id }, select: { id: true, action: true, message: true, createdAt: true, author: { select: { name: true } } }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (query.page - 1) * 30, take: 30 }),
       this.db.ticketEntry.count({ where: { ticketId: id } }),
     ]);
-    return { ticket, entries: entries.reverse(), total, page: query.page, pageSize: 30 };
+    const cycle = await this.db.ticketCycle.findFirst({ where: { ticketId: id }, orderBy: { startedAt: 'desc' }, select: { id: true, closedAt: true, score: true } });
+    return { ticket, cycle, entries: entries.reverse(), total, page: query.page, pageSize: 30 };
   }
 
   @Post()
   async open(@Body() dto: OpenTicketDto, @Req() req: AuthRequest) {
     try {
-      return await this.db.ticket.create({ data: { id: dto.requestId, requesterId: req.principal.id, title: dto.title, description: dto.description, entries: { create: { authorId: req.principal.id, action: 'opened', message: '' } } }, select: summary });
+      return await serial(this.db, async tx => {
+        const previous = await tx.ticket.findUnique({ where: { id: dto.requestId } });
+        if (previous) {
+          if (previous.requesterId !== req.principal.id || previous.title !== dto.title || previous.description !== dto.description) throw new ConflictException('Identificador já utilizado.');
+        } else await tx.ticket.create({ data: { id: dto.requestId, requesterId: req.principal.id, title: dto.title, description: dto.description, cycles: { create: {} }, entries: { create: { authorId: req.principal.id, action: 'opened', message: '' } } } });
+        await distribute(tx);
+        return tx.ticket.findUniqueOrThrow({ where: { id: dto.requestId }, select: summary });
+      });
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error;
       const previous = await this.db.ticket.findUnique({ where: { id: dto.requestId } });
@@ -81,7 +89,7 @@ export class TicketsController {
             if (prior.ticketId !== id || prior.authorId !== user.id || prior.action !== dto.action || prior.message !== dto.message) throw new ConflictException('Identificador de ação já utilizado.');
             return { id, version: ticket.version };
           }
-          const operator = staff(user) && (ticket.assigneeId === user.id || user.roles.includes('admin'));
+          const operator = staff(user) && (ticket.assigneeId === user.id || manager(user));
           let status = ticket.status;
           let assigneeId = ticket.assigneeId;
           if (dto.action === 'claim') {
@@ -104,6 +112,15 @@ export class TicketsController {
           const changed = await tx.ticket.updateMany({ where: { id, version: dto.version }, data: { status, assigneeId, version: { increment: 1 } } });
           if (changed.count !== 1) throw new ConflictException('O chamado mudou. Atualize o histórico antes de tentar novamente.');
           await tx.ticketEntry.create({ data: { id: dto.requestId, ticketId: id, authorId: user.id, action: dto.action, message: dto.message } });
+          const cycle = await tx.ticketCycle.findFirst({ where: { ticketId: id, closedAt: null }, orderBy: { startedAt: 'desc' } });
+          const now = new Date();
+          if (cycle && operator && user.id !== ticket.requesterId && ['reply', 'resolve'].includes(dto.action)) {
+            await tx.ticketCycle.update({ where: { id: cycle.id }, data: { ...(!cycle.firstResponseAt ? { firstResponseAt: now } : {}), ...(dto.action === 'resolve' ? { closedAt: now, resolverId: user.id } : {}) } });
+          } else if (cycle && dto.action === 'resolve') {
+            await tx.ticketCycle.update({ where: { id: cycle.id }, data: { closedAt: now, resolverId: user.id } });
+          }
+          if (dto.action === 'reopen') await tx.ticketCycle.create({ data: { ticketId: id, startedAt: now } });
+          if (dto.action === 'resolve' || dto.action === 'reopen') await distribute(tx);
           return { id, version: dto.version + 1 };
         }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
       } catch (error) {
@@ -114,5 +131,16 @@ export class TicketsController {
         throw error;
       }
     }
+  }
+  @Post(':id/rating')
+  async rate(@Param('id', ParseUUIDPipe) id: string, @Body() dto: RatingDto, @Req() req: AuthRequest) {
+    return serial(this.db, async tx => {
+      const cycle = await tx.ticketCycle.findFirst({ where: { id: dto.cycleId, ticketId: id, ticket: { requesterId: req.principal.id } } });
+      if (!cycle) throw missing();
+      if (!cycle.closedAt || cycle.resolverId === req.principal.id) throw new ConflictException('Avaliação disponível somente após atendimento concluído por outra pessoa.');
+      if (cycle.score !== null && cycle.score !== dto.score) throw new ConflictException('Este atendimento já foi avaliado.');
+      if (cycle.score === null) await tx.ticketCycle.update({ where: { id: cycle.id }, data: { score: dto.score, ratedAt: new Date() } });
+      return { score: dto.score };
+    });
   }
 }

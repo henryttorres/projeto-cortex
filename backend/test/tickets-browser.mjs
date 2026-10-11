@@ -44,10 +44,13 @@ try {
   await page.getByRole('button', { name: 'Sair da conta' }).click();
   await login('suporte');
   await expect(page.getByRole('heading', { name: 'Fila de suporte' })).toBeVisible();
+  await page.getByRole('button', { name: 'Receber chamados', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Pausar recebimento' })).toBeVisible();
+  await page.getByRole('button', { name: 'Atualizar chamados' }).click();
   await page.screenshot({ path: `${evidence}/suporte-fila-desktop.png`, fullPage: true });
   await open();
-  await expect(page.getByLabel('Sua mensagem')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Assumir chamado' }).click();
+  await expect(page.getByLabel('Sua mensagem')).toBeVisible();
+  await expect(page.getByText('Distribuição automática por disponibilidade e menor carga.', { exact: true })).toBeVisible();
   await page.getByLabel('Sua mensagem').fill('Abra Comunicados e selecione o estudante para consultar as orientações.');
   await page.getByRole('button', { name: 'Revisar resposta', exact: true }).click();
   await page.getByRole('button', { name: 'Confirmar resposta' }).click();
@@ -65,6 +68,8 @@ try {
   await login('ana');
   await open();
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Avaliar com nota 5' }).click();
+  await expect(page.getByText('Obrigado! Nota registrada: 5/5.')).toBeVisible();
   await page.screenshot({ path: `${evidence}/suporte-historico-mobile.png`, fullPage: true });
   if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw new Error('Overflow mobile');
   await page.getByRole('button', { name: 'Reabrir chamado' }).click();
@@ -94,6 +99,15 @@ try {
   if (status !== 201) throw new Error('Logout sintético falhou');
   await page.getByRole('button', { name: 'Atualizar histórico' }).click();
   await expect(page.getByRole('heading', { name: 'Já tenho cadastro', exact: true })).toBeVisible();
+  await login('supervisor');
+  await page.getByRole('button', { name: 'Indicadores', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Indicadores de atendimentos encerrados' })).toBeVisible();
+  await expect(page.getByText('Visão da operação: todos os ciclos da instituição.')).toBeVisible();
+  await expect(page.locator('.metrics-table tbody')).toContainText('Suporte');
+  await page.screenshot({ path: `${evidence}/indicadores-mobile.png`, fullPage: true });
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw new Error('Overflow dos indicadores mobile');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: `${evidence}/indicadores-desktop.png`, fullPage: true });
   if (errors.length) throw new Error(`Erros de página: ${errors.length}`);
   console.log('UI suporte: revisão, reenvio único, fila, atribuição, resposta, encerramento, isolamento, reabertura, texto inerte, persistência, mobile e sessão revogada aprovados.');
 } finally {

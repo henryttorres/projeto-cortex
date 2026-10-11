@@ -11,6 +11,7 @@ Preparação e acessos: [backend/README.md](backend/README.md).
 Resultados e limites: [relatório da integração](docs/integracao-backend-2026-10-10.md).
 Marco seguinte: [comunicados por turma e próximos passos](docs/comunicados-2026-10-10.md).
 Entrega mais recente: [chamados e fila de suporte](docs/chamados-2026-10-10.md), com [revisão Purple Team](docs/seguranca-atendimento-2026-10-10.md).
+11/10: [distribuição automática, hierarquia e indicadores de encerrados](docs/operacao-metricas-2026-10-11.md), com CSAT e visão pessoal/consolidada.
 Localhost: http://127.0.0.1:5173 (requer API e banco ativos).
 
 Interesse, recuperação de senha, IA e implantação pública

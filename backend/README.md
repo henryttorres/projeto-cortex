@@ -103,6 +103,10 @@ O assistente ainda é guiado por botões, sem LLM.
 
 ## Verificações
 
+Operação: `npm run test:operations` valida roteamento, métricas e CSAT em schema
+temporário isolado. Os detalhes de API, contas supervisor/coordenador, metas e
+limites estão em `docs/operacao-metricas-2026-10-11.md` na raiz do projeto.
+
 `npm run build && npm test`: integração HTTP contra banco com seed fictício.
 Não executar em banco de produção. A suíte remove apenas seus registros
 sintéticos e gera sessões de teste com expiração.

@@ -90,11 +90,12 @@ test('concorrência: apenas um atendente assume; o outro não responde ou encerr
   await act('owner', id, 'claim', 0).expect(403);
   await act('staff', id, 'reply', 0, 'Ainda não assumiu').expect(403);
   const results = await Promise.all([act('staff', id, 'claim', 0), act('staff2', id, 'claim', 0)]);
-  assert.deepEqual(results.map(r => r.status).sort(), [201, 409]);
+  assert.equal(results.filter(r => r.status === 201).length, 1);
+  assert.ok(results.every(r => [201, 404, 409].includes(r.status)));
   const ticket = await db.ticket.findUniqueOrThrow({ where: { id } });
   const loser = ticket.assigneeId === actors.staff.id ? 'staff2' : 'staff';
-  await act(loser, id, 'reply', 1, 'Não autorizado').expect(403);
-  await act(loser, id, 'resolve', 1, 'Não autorizado').expect(403);
+  await act(loser, id, 'reply', 1, 'Não autorizado').expect(404);
+  await act(loser, id, 'resolve', 1, 'Não autorizado').expect(404);
   assert.equal(await db.ticketEntry.count({ where: { ticketId: id, action: 'claim' } }), 1);
 });
 test('resposta idempotente, controle de versão, encerramento justificado e reabertura', async () => {

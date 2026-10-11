@@ -11,6 +11,8 @@ enum Role {
   teacher
   admin
   support
+  supervisor
+  coordinator
 }
 model Account {
   id String @id @default(uuid()) @db.Uuid
@@ -27,6 +29,8 @@ model Account {
   tickets Ticket[] @relation("Requester")
   assignedTickets Ticket[] @relation("Assignee")
   ticketEntries TicketEntry[]
+  supportReadyUntil DateTime?
+  resolvedCycles TicketCycle[]
   createdAt DateTime @default(now())
 }
 model AccountRole {
@@ -123,6 +127,7 @@ enum TicketStatus {
   resolved
 }
 enum TicketAction {
+  assigned
   opened
   reply
   claim
@@ -142,6 +147,7 @@ model Ticket {
   requester Account @relation("Requester", fields: [requesterId], references: [id], onDelete: Restrict)
   assignee Account? @relation("Assignee", fields: [assigneeId], references: [id], onDelete: Restrict)
   entries TicketEntry[]
+  cycles TicketCycle[]
   @@index([requesterId, updatedAt, id])
   @@index([status, updatedAt, id])
 }
@@ -155,4 +161,21 @@ model TicketEntry {
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   author Account @relation(fields: [authorId], references: [id], onDelete: Restrict)
   @@index([ticketId, createdAt, id])
+}
+model TicketCycle {
+  id String @id @default(uuid()) @db.Uuid
+  ticketId String @db.Uuid
+  startedAt DateTime @default(now()) @db.Timestamptz(3)
+  firstResponseAt DateTime? @db.Timestamptz(3)
+  closedAt DateTime? @db.Timestamptz(3)
+  resolverId String? @db.Uuid
+  firstTargetMinutes Int @default(240)
+  resolutionTargetMinutes Int @default(960)
+  policy String @default("demo-bahia-9-17-v1")
+  score Int?
+  ratedAt DateTime? @db.Timestamptz(3)
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  resolver Account? @relation(fields: [resolverId], references: [id], onDelete: Restrict)
+  @@index([ticketId, startedAt])
+  @@index([closedAt, resolverId])
 }

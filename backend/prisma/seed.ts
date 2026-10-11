@@ -23,6 +23,9 @@ async function seed() {
     if (!await db.agendaEvent.count({ where: { classId: turma.id } })) await db.agendaEvent.create({ data: { classId: turma.id, title: turma.id === classA.id ? 'Oficina de perguntas e fontes' : 'Planejamento de estudos', description: 'Atividade fictícia para validar a integração do Cortéx.', location: 'Sala de aprendizagem', startsAt: new Date('2026-10-13T17:00:00Z'), endsAt: new Date('2026-10-13T18:00:00Z') } });
   }
   await db.teaching.upsert({ where: { accountId_classId: { accountId: accounts[2].id, classId: classA.id } }, update: {}, create: { accountId: accounts[2].id, classId: classA.id } });
-  console.log('Cinco contas fictícias, dois estudantes e duas turmas preparados.');
+  for (const [name, role] of [['Supervisor', 'supervisor'], ['Coordenador', 'coordinator']] as const) {
+    await db.account.upsert({ where: { email: `${name.toLowerCase()}@demo.cortex.test` }, update: {}, create: { name, email: `${name.toLowerCase()}@demo.cortex.test`, passwordHash: await hashPassword(password), roles: { create: { role } } } });
+  }
+  console.log('Sete contas fictícias, dois estudantes e duas turmas preparados.');
 }
 seed().finally(() => db.$disconnect());

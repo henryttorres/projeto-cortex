@@ -65,6 +65,7 @@ export class AuthController {
 
   @Post('logout') @UseGuards(SessionGuard)
   async logout(@Req() req: AuthRequest, @Res({ passthrough: true }) res: Response) {
+    await this.db.account.update({ where: { id: req.principal.id }, data: { supportReadyUntil: null } });
     await this.db.session.deleteMany({ where: { id: req.sessionId } });
     res.clearCookie(COOKIE, { path: '/api', httpOnly: true, sameSite: 'strict', secure: process.env.NODE_ENV === 'production' });
     return { message: 'Sessão encerrada.' };

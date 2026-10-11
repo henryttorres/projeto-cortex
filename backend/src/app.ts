@@ -10,10 +10,11 @@ import { PrismaService } from './prisma.service';
 import { AccessService } from './access.service';
 import { CommunicationsController } from './communications';
 import { TicketsController } from './tickets';
+import { OperationsController } from './operations';
 
 @Module({
   imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }])],
-  controllers: [AuthController, SchoolController, CommunicationsController, TicketsController],
+  controllers: [AuthController, SchoolController, CommunicationsController, TicketsController, OperationsController],
   providers: [PrismaService, SessionGuard, AccessService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 class AppModule {}

@@ -1,5 +1,10 @@
 # Gestão do atendimento — métricas, hierarquia e dashboard
 
+Atualização em 11/10: implementação parcial e mudança do recorte para **ciclos
+encerrados no período**, conforme novo pedido de Henry. Estado real e limites
+em [marco da operação](operacao-metricas-2026-10-11.md). O restante abaixo é proposta,
+não deve ser interpretado como funcionalidade já entregue.
+
 Especificação do próximo marco, registrada em 10/10/2026. Henry autorizou propor
 configuração demonstrativa porque horários e metas reais ainda não foram definidos.
 **Este documento não implementa indicadores, CSAT, papéis ou dashboards.**
