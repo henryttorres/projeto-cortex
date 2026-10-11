@@ -1,18 +1,19 @@
-# Estrutura versionada — 28/09/2026
+# Estrutura — 11/10/2026
 
-- `README.md`: entrada do projeto, execução e arquitetura conceitual.
-- `frontend/src/App.tsx`: protótipo público e portal de demonstração.
-- `frontend/src/index.css`: estilos responsivos de baixa fidelidade.
-- `frontend/src/main.tsx`: entrada React.
-- `frontend/index.html`, `vite.config.ts`, `tsconfig.json`: configuração local.
-- `frontend/package.json`, `pnpm-lock.yaml`: scripts, dependências e versões.
-- `frontend/README.md`: execução e origem da exportação.
-- `docs/fase-1-arquitetura-e-fluxos.md`: entidades, relações e mapa de navegação.
-- `docs/validacao-2026-09-28.md`: roteiro executado, evidências e pendências.
-- `docs/evidencias/2026-09-28/`: capturas do protótipo local.
-- `docs/guia-repositorio.md`: registro histórico do antigo readme minúsculo.
-- `docs/readme-demonstracao.md`: apresentação conceitual, com limites de validação.
-- `docs/arquitetura-v0.1.md`: visão inicial das camadas futuras.
-- `referencias/landing-antiga.html`: referência estática anterior, preservada.
+| Local | Função |
+|---|---|
+| README.md / docs/README.md | Entrada e índice |
+| Cortex.code-workspace / COMECE-AQUI.md | Ambiente VS Code |
+| frontend/src/App.tsx / index.css | Landing e demonstração |
+| frontend/src/ConnectedPortal.tsx / connected-portal.css | Portal integrado |
+| frontend/src/Communications.tsx / Tickets.tsx / Operations.tsx | Comunicados, atendimento e métricas |
+| frontend/src/api.ts | Comunicação e sessão |
+| backend/src | API e autorização |
+| backend/prisma/schema.prisma / migrations | Modelo físico vigente e evolução |
+| backend/test | Testes HTTP, operação e navegador |
+| backend/bancodedados | SQL histórico; não aplicar sobre banco integrado |
+| docs/evidencias / docs/marca | Capturas e identidade |
+| scripts/iniciar-integracao.ps1 | Inicialização após preparo |
+| referencias | Materiais antigos |
 
-Backend, banco de dados e motor de IA ainda são planejados. Pastas sem arquivos não são versionadas pelo Git. A execução atual parte de `frontend/`.
+node_modules/dist são gerados. .env/.local-data são privados e ignorados. Materiais não rastreados, incluindo perfil Purple Team, não devem ser adicionados automaticamente.

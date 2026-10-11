@@ -29,7 +29,7 @@
     "explorer.fileNesting.patterns": {
       "package.json": "pnpm-lock.yaml, tsconfig.json, vite.config.ts"
     },
-    "terminal.integrated.cwd": "${workspaceFolder}/frontend",
+    "terminal.integrated.cwd": "${workspaceFolder}",
     "terminal.integrated.env.windows": {
       "PATH": "${env:PATH};${env:USERPROFILE}\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;${env:USERPROFILE}\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback"
     },
@@ -117,6 +117,33 @@
           "reveal": "always",
           "panel": "dedicated"
         }
+      },
+      {
+        "label": "Cortéx: Iniciar integração local",
+        "type": "shell",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-File",
+          "scripts/iniciar-integracao.ps1"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Cortéx: Build da API",
+        "type": "shell",
+        "command": "npm.cmd",
+        "args": [
+          "run",
+          "build"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}/backend"
+        },
+        "problemMatcher": "$tsc"
       }
     ]
   }

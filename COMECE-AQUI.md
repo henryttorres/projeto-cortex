@@ -1,38 +1,20 @@
 # Cortéx no VS Code
 
-Abra **Cortex.code-workspace** por Arquivo → Abrir Workspace do Arquivo. A barra de título mostra o caminho da cópia em uso.
+Abra **Cortex.code-workspace** por Arquivo → Abrir Workspace do Arquivo. O título mostra o caminho para distinguir cópias.
 
-## Rotina
+1. Confira `git status -sb`: integração em **prod**. Preserve mudanças/stashes.
+2. Máquina nova: [preparo da API](backend/README.md) e `pnpm --dir frontend install --frozen-lockfile`.
+3. Ambiente preparado: tarefa **Cortéx: Iniciar integração local**. Inicia banco portátil existente/API/Vite; recusa portas ocupadas.
+4. Abra http://127.0.0.1:5173. Acessos fictícios em .local-data/ACESSOS.md (privado).
+5. Edite conforme [estrutura](docs/estrutura-do-projeto.md). Landing em App.tsx; portal integrado em ConnectedPortal.tsx e módulos.
+6. Execute builds/testes pertinentes. Reinicie API após recompilar; Vite atualiza frontend.
 
-1. Primeira vez: Terminal → Executar Tarefa → **Cortéx: 1. Instalar dependências**.
-2. Trabalhar: Terminal → Executar Tarefa → **Cortéx: 2. Iniciar site**.
-3. Abra o endereço do terminal: normalmente http://127.0.0.1:5173/.
-4. Edite `frontend/src/App.tsx` (telas) e `frontend/src/index.css` (estilos). Salvar atualiza a página.
-5. Antes de entregar, **Ctrl+Shift+B** executa a verificação TypeScript e o build.
-6. Para parar, use Ctrl+C no terminal da tarefa. Não execute dois servidores na mesma porta.
+Terminal abre na raiz. Tarefas têm diretório próprio. Nenhuma inicia automaticamente ou instala extensões. Dados da API persistem; a demonstração antiga continua simulada.
 
-Nenhuma tarefa inicia automaticamente. O workspace não instala extensões nem muda configurações globais. No Windows, adiciona ao PATH dos novos terminais um fallback para Node/pnpm do Codex, se existir. Outra máquina precisa de Node.js 24 e pnpm 11 instalados.
+## Cópias locais
 
-## Onde está cada coisa
+O print mostra projeto_escola_cortex, main*, possivelmente outra cópia modificada. Não resetar, apagar ou aplicar pull nela sem revisar. Esta sessão trabalha em `C:\Users\henry\OneDrive\Documentos\ChatGPT\Projeto Cortéx`. Abra seu workspace para acessar os arquivos atuais.
 
-| Local | Uso |
-|---|---|
-| `frontend/src/App.tsx` | Telas e interações do protótipo |
-| `frontend/src/index.css` | Aparência e responsividade |
-| `frontend/index.html` | Entrada da aplicação React; servido pelo Vite |
-| `frontend/package.json` | Comandos e dependências; expanda para ver arquivos de configuração agrupados |
-| `docs/` | Arquitetura, entidades e validação |
-| `referencias/landing-antiga.html` | HTML anterior, preservado como referência |
-| `frontend/dist/` | Resultado gerado do build; não editar |
+Use Vite/API; Live Server não atende fluxos integrados. O script inicia processos em segundo plano e informa PIDs; verifique a identidade antes de encerrá-los. Logs em .local-data.
 
-Dependências, cache e build estão ocultos no Explorer para simplificar a navegação, mas continuam no disco. O lockfile está agrupado sob package.json, não apagado.
-
-## Live Server
-
-Para desenvolvimento use **Iniciar site**. O Live Server só serve o build já gerado: execute **Verificar e gerar build** primeiro. O workspace aponta a raiz do Live Server para `frontend/dist`. A opção **Visualizar build** usa o Vite Preview em http://127.0.0.1:4173/ e é a alternativa sem extensão.
-
-## Git e cópias do projeto
-
-Trabalhe sempre na mesma cópia local por sessão; confira o caminho na barra de título. Stashes são backups separados: não aplicar nem apagar sem revisar o conteúdo. Commits ficam no repositório; o Figma não recebe alterações locais automaticamente.
-
-O protótipo usa dados fictícios em memória. Atualizar a página reinicia os dados.
+Consulte [prod → main](docs/fluxo-git.md) e o [índice documental](docs/README.md).

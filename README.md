@@ -1,289 +1,47 @@
 # Cortéx Instituto de Aprendizagem
 
-## Estado atual — 10/10/2026
+Plataforma acadêmica e de atendimento. Equipe: **Henry, Eduardo, Joelly, Eduarda, Danilo e Luna**.
 
-Primeira integração real disponível: **NestJS + Prisma + PostgreSQL**, com login,
-sessão, vínculos autorizados, agenda, comunicados e chamados persistidos. Professora publica compromissos e avisos
-para sua turma; aluno e responsável consultam apenas seus vínculos. O portal
-demonstrativo anterior permanece separado.
+## Estado verificado — 11/10/2026
 
-Preparação e acessos: [backend/README.md](backend/README.md).
-Resultados e limites: [relatório da integração](docs/integracao-backend-2026-10-10.md).
-Marco seguinte: [comunicados por turma e próximos passos](docs/comunicados-2026-10-10.md).
-Entrega mais recente: [chamados e fila de suporte](docs/chamados-2026-10-10.md), com [revisão Purple Team](docs/seguranca-atendimento-2026-10-10.md).
-11/10: [distribuição automática, hierarquia e indicadores de encerrados](docs/operacao-metricas-2026-10-11.md), com CSAT e visão pessoal/consolidada.
-Localhost: http://127.0.0.1:5173 (requer API e banco ativos).
+React/TypeScript/Vite com identidade visual aplicada, API NestJS/Prisma e PostgreSQL. Login, vínculos acadêmicos, agenda, comunicados e chamados são persistidos. A demonstração anterior permanece separada do portal integrado.
 
-Interesse, recuperação de senha, IA e implantação pública
-ainda não estão integrados. Não usar dados pessoais reais no ambiente de teste.
+Atendimento: distribuição automática por disponibilidade e menor carga, histórico, reabertura, CSAT e indicadores de ciclos encerrados. Metas demonstrativas: primeira resposta em 4h úteis e resolução em 16h úteis, seg–sex 09–17h, Bahia, sem feriados.
 
-## Histórico do protótipo — 28/09/2026
+**Ainda não implementado:** equipes/funcionários, transferência administrativa, alcance por equipe de supervisor/coordenador, SLA dos chamados abertos e metas editáveis. Atualmente supervisor/coordenador têm alcance institucional no código. A nova política ADMIN está especificada, mas não aplicada. Sem deploy público.
 
-Protótipo de baixa fidelidade exportado do Figma Make e executável localmente em **[frontend/](frontend/README.md)**. O HTML anterior está em `referencias/landing-antiga.html`. Abra [Cortex.code-workspace](Cortex.code-workspace) no VS Code e siga [COMECE-AQUI.md](COMECE-AQUI.md).
+## Guias
 
-### Executar localmente
-
-Para rodar o projeto em ambiente Windows, é necessário ter o Node.js instalado. A versão utilizada na validação foi Node.js 24 e pnpm 11.
-
-Opção 1: execução manual:
-
-```powershell
-# a partir da raiz do projeto
-$env:Path += ';C:\Program Files\nodejs'
-cd .\frontend
-pnpm install --frozen-lockfile
-pnpm dev
-```
-
-Opção 2: execução automatizada com menu:
-
-```powershell
-# a partir da raiz do projeto
-.\scripts\menu_cortex.bat
-```
-
-O menu verifica Node e pnpm, instala dependências ausentes e inicia o Vite em localhost. Não instala ferramentas globais nem encerra processos por porta. O projeto será aberto em http://127.0.0.1:5173/.
-
-Validação de build:
-
-```powershell
-cd .\frontend
-pnpm build
-```
-
-`pnpm build` verifica TypeScript e gera o build da aplicação.
-
-Atendimento com histórico e revisão de encerramento. [Resultados, evidências e pendências](docs/validacao-2026-09-28.md). Dados fictícios em memória; sem backend, autenticação real ou IA conectada. Alterações locais não sincronizam automaticamente com o Figma.
-
-### Menu de desenvolvimento
-
-Para facilitar a execução local, use o atalho [scripts/menu_cortex.bat](scripts/menu_cortex.bat). Ele automatiza:
-
-- verificação de Node.js
-- verificação de pnpm já instalado
-- aviso quando a porta está ocupada
-- inicialização do Vite localmente
-- abertura do navegador na aplicação
-- orientação para parar o servidor com `Ctrl+C` no terminal de execução
-
-Também há suporte de parada e abertura direta:
-
-- [scripts/parar_cortex.bat](scripts/parar_cortex.bat)
-- [scripts/abrir_cortex_navegador.bat](scripts/abrir_cortex_navegador.bat)
-
-### Teste funcional do fluxo local
-
-1. Execute [scripts/menu_cortex.bat](scripts/menu_cortex.bat) a partir da raiz do projeto
-2. Escolha a opção para iniciar o projeto
-3. Aguarde a inicialização do Vite em http://127.0.0.1:5173/
-4. Abra a URL no navegador
-5. Valide a landing e os fluxos de demonstração
-6. Para encerrar, use `Ctrl+C` no terminal de execução; [scripts/parar_cortex.bat](scripts/parar_cortex.bat) apenas mostra instruções
-
-
-## Fase 1 — arquitetura da informação e modelo conceitual
-
-Cortéx Instituto de Aprendizagem · arquitetando front e back end com wireframe de baixa fidelidade · 27/09/2026
-
-Prazo da ação: até 30 dias a partir do início acordado. 
-Projeto completo: até 90 dias.
-
-[Protótipo Figma Make](https://www.figma.com/make/On6DHqjebObIzN21tfJVHO/)
-
-Este documento registra hipóteses de produto, não funcionalidades de produção ou um esquema SQL executado. A landing tem texto provisório; oferta, modalidade, público exato e condições de inscrição ainda precisam ser confirmados. O README situa a iniciativa no ensino médio e capacitação de professores; não expandir para ensino fundamental sem decisão explícita.
-
-## 1. Separação de conceitos
-
-- Interesse: pedido para conhecer a proposta; não significa matrícula.
-- Conta: identidade de acesso; pode possuir mais de um papel.
-- Aluno: pessoa acompanhada, com conta opcional.
-- Responsável: pessoa com vínculo verificado com um ou mais alunos.
-- Matrícula: vínculo de aluno a turma, com estado e período.
-- Docência: vínculo de professor a turma.
-- Administrador e suporte: papéis da conta, com permissões delimitadas.
-- IA: serviço de atendimento, sem conta administrativa e sem acesso irrestrito ao banco.
-
-## 2. Entidades e cardinalidades
-
-```mermaid
-erDiagram
-    CONTA ||--o{ CONTA_PAPEL : possui
-    PAPEL ||--o{ CONTA_PAPEL : classifica
-    CONTA |o--o| ALUNO : acesso_opcional
-    CONTA |o--o| RESPONSAVEL : acesso_opcional
-    CONTA |o--o| PROFESSOR : acesso_opcional
-    RESPONSAVEL ||--o{ VINCULO_RESPONSAVEL : participa
-    ALUNO ||--o{ VINCULO_RESPONSAVEL : possui
-    PROGRAMA ||--o{ TURMA : organiza
-    ALUNO ||--o{ MATRICULA : participa
-    TURMA ||--o{ MATRICULA : recebe
-    PROFESSOR ||--o{ DOCENCIA : participa
-    TURMA ||--o{ DOCENCIA : recebe
-    TURMA ||--o{ COMPROMISSO : agenda
-    CONTA ||--o{ COMUNICADO : publica
-    COMUNICADO ||--|{ COMUNICADO_TURMA : destina
-    TURMA ||--o{ COMUNICADO_TURMA : recebe
-```
-
-Relações muitos-para-muitos passam por entidades associativas. Conta opcional não implica aluno inexistente. Uma pessoa que seja professor e responsável pode usar uma conta com ambos os papéis. O modelo físico deve normalizar a identidade e detalhar exclusão, histórico e integridade.
-
-### Dicionário e restrições propostas
-
-| Entidade | Dados e regra principal |
+| Guia | Conteúdo |
 |---|---|
-| Conta | id, identificação de acesso, nome de exibição, estado |
-| ContaPapel | conta_id + papel_id únicos |
-| Aluno / Responsável / Professor | id, dados de domínio, conta_id opcional e único por entidade |
-| VinculoResponsavel | responsável, aluno, tipo de relação, estado de verificação, validade |
-| Programa | oferta educacional e estado; catálogo a confirmar |
-| Turma | programa, nome, período, estado |
-| Matricula | aluno, turma, início, término opcional, estado; impedir vínculo ativo duplicado no mesmo período |
-| Docencia | professor, turma, período, estado |
-| Compromisso | turma, título, início, fim, local; fim posterior ao início |
-| Comunicado | autor, título, corpo, estado, data de publicação |
-| ComunicadoTurma | comunicado + turma únicos; publicado exige ao menos um destinatário autorizado |
-| Interesse | contato do interessado, canal, programa opcional, estado, origem; sem exigir dados completos da criança |
-| Conversa | sessão pública ou conta, contexto, início e estado |
-| Mensagem | conversa, autoria visitante/usuário/IA/atendente/sistema, conteúdo, data |
-| Chamado | solicitante/contato, conversa opcional, assunto, atendente opcional, estado |
-| RespostaChamado | chamado, autor autorizado, texto, data; histórico de respostas |
-| DocumentoBase / VersaoDocumento | fonte, público permitido, versão, revisão e aprovação |
-| FonteMensagem | mensagem e versão de documento; rastreabilidade da resposta |
-| EventoAuditoria | ator, ação, recurso e data; não duplicar credenciais ou dados sensíveis no log |
+| [Índice](docs/README.md) | Evidências e ordem de leitura |
+| [VS Code](COMECE-AQUI.md) | Workspace e execução |
+| [Backend](backend/README.md) | Preparo, migrações, contas e endpoints |
+| [Entidades e permissões](docs/equipes-entidades-permissoes.md) | Modelo atual e evolução de equipes |
+| [Plano de 90 dias](docs/plano-90-dias.md) | Marcos, responsáveis propostos e indicadores |
+| [Fluxo Git](docs/fluxo-git.md) | prod → validação → main |
+| [Estrutura](docs/estrutura-do-projeto.md) | Onde editar |
+| [Identidade visual](docs/marca/direcao-visual.md) | Marca e tipografia |
+| [Operação](docs/operacao-metricas-2026-10-11.md) | Métricas e evidências anteriores |
 
-### Atendimento e captação
+## Execução
 
-```mermaid
-erDiagram
-    CONTA |o--o{ INTERESSE : referencia
-    INTERESSE |o--o{ MATRICULA : origem_eventual
-    CONTA |o--o{ CONVERSA : inicia
-    CONVERSA ||--o{ MENSAGEM : contem
-    CONVERSA |o--o| CHAMADO : encaminha
-    CONTA |o--o{ CHAMADO : solicita
-    CONTA |o--o{ CHAMADO : atende
-    CHAMADO ||--o{ RESPOSTA_CHAMADO : recebe
-    CONTA ||--o{ RESPOSTA_CHAMADO : escreve
-    DOCUMENTO_BASE ||--o{ VERSAO_DOCUMENTO : possui
-    VERSAO_DOCUMENTO ||--o{ FONTE_MENSAGEM : fundamenta
-    MENSAGEM ||--o{ FONTE_MENSAGEM : cita
+Abra [Cortex.code-workspace](Cortex.code-workspace). Em máquina nova, siga o [preparo da API](backend/README.md) e execute `pnpm --dir frontend install --frozen-lockfile`.
+
+No Windows já preparado, pela raiz:
+
+```powershell
+.\scripts\iniciar-integracao.ps1
 ```
 
-As duas relações Conta–Chamado são campos distintos: solicitante e atendente. Chamado público exige sessão segura ou identificação verificável para consulta; apenas conhecer um número ou e-mail não autoriza acesso. IA só consulta dados privados por operações do servidor autorizadas para o solicitante.
+Acesse http://127.0.0.1:5173. Vite encaminha `/api` para a porta 3001. Banco local preparado: 54329. O script recusa portas ocupadas. Live Server não substitui a API/Vite nos fluxos integrados.
 
-## 3. Mapa público e interno
+Credenciais fictícias somente em `.local-data/ACESSOS.md`. Não publicar `.env`, tokens, senhas ou dados reais.
 
-```mermaid
-flowchart TD
-    LP[Landing] --> INT[Interesse]
-    INT --> CONF[Confirmação]
-    LP --> LOGIN[Login]
-    LOGIN --> REC[Recuperação]
-    LOGIN --> CTX[Contexto autorizado]
-    CTX --> AL[Aluno]
-    CTX --> RES[Responsável]
-    CTX --> PRO[Professor]
-    CTX --> ADM[Administração]
-    CTX --> SUP[Suporte]
-    RES --> DEP[Estudante vinculado]
-    DEP --> ROT[Agenda e comunicados]
-    AL --> ROT
-    PRO --> TUR[Minhas turmas]
-    TUR --> PUB[Criar - revisar - publicar aviso]
-    ADM --> GES[Contas - vínculos - turmas - matrículas]
-    ADM --> CAP[Interesses]
-    ADM --> HOR[Horários]
-    AL --> AT[Atendimento]
-    RES --> AT
-    PRO --> AT
-    AT --> HUM[Confirmar encaminhamento]
-    HUM --> CHA[Chamado e acompanhamento]
-    CHA --> SUP
-```
+## Validação e limites
 
-No protótipo, o seletor de perfis fica em um acesso explícito de DEMONSTRAÇÃO, separado do login. Na produção, contexto só lista perfis já autorizados.
+Em `backend`: `npm run build`, `npm test`, `npm run test:support`, `npm run test:operations`. Interface com serviços ativos: `npm run test:ui`, `npm run test:communications:ui`, `npm run test:support:ui`. Frontend pela raiz: `pnpm --dir frontend build`.
 
-## 4. Inventário de telas e CTAs
+O relatório anterior registra 27 testes HTTP/operação e três suítes de interface aprovados em 11/10. Isso não substitui testar novas alterações. A organização documental não altera o comportamento da aplicação.
 
-| Código | Tela | Ação principal / destino |
-|---|---|---|
-| P01 | Landing institucional | Quero me inscrever → P02; Já tenho cadastro → A01 |
-| P02 | Interesse | Enviar interesse → P03; erros junto aos campos |
-| P03 | Confirmação | Voltar à página inicial; informar que não é matrícula |
-| A01 | Login | Entrar; recuperar acesso → A02 |
-| A02 | Recuperação | Confirmar simulação / voltar |
-| X01 | Seletor de perfis fictícios | Explorar fluxo; não concede autorização real |
-| U01 | Início por perfil | Próxima tarefa, agenda e avisos |
-| U02 | Agenda por dia | Abrir compromisso |
-| U03 | Lista / detalhe do comunicado | Ler e voltar preservando contexto |
-| R01 | Seletor de estudante | Alterar contexto vinculado |
-| T01 | Minhas turmas | Consultar turma autorizada |
-| T02 | Criar comunicado | Revisar → editar ou publicar → confirmar |
-| D01 | Interesses administrativos | Abrir detalhe e atualizar estado demonstrativo |
-| D02 | Pessoas, vínculos, turmas | Consultar modelo; gestão completa a detalhar |
-| S01 | Atendimento simulado | Opções guiadas / falar com equipe |
-| S02 | Encaminhamento | Revisar resumo e confirmar chamado |
-| S03 | Fila e detalhe de chamado | Assumir, responder, encerrar |
-| S04 | Acompanhamento | Ver status e resposta do próprio chamado |
-
-## 5. Landing e responsividade
-
-Ordem: cabeçalho → apresentação → proposta/metodologia → etapas → carrossel Acontece no Cortéx → FAQ → CTA final e rodapé.
-O CTA de inscrição repete rótulo e destino. Mobile mantém Entrar fora do menu recolhido. Hero mobile apresenta texto e CTA antes do placeholder.
-Carrossel sem autoplay, com arraste, botões e teclado. Modal fecha por Escape e devolve foco. Imagens informativas recebem descrição. Não colocar informações essenciais apenas no carrossel.
-Agenda mobile é lista por dia. Desktop pode apresentar grade depois de validar as necessidades.
-Mesmas tarefas nos dois formatos, sem hover obrigatório. Formulários mantêm dados após erro. Larguras de revisão: 360, 390, 768, 1024 e 1440 px.
-
-## 6. Matriz de acesso conceitual
-
-| Perfil | Leitura | Escrita |
-|---|---|---|
-| Visitante | público e própria sessão | interesse e mensagens próprias |
-| Aluno | turmas com matrícula válida | atendimento e opções da própria conta |
-| Responsável | informações permitidas dos vinculados verificados | atendimento próprio |
-| Professor | turmas com docência válida | avisos dessas turmas |
-| Admin | operação autorizada | cadastro, vínculos, horários, interesses |
-| Suporte | fila autorizada e contexto necessário | respostas e estados de chamados |
-| IA | fontes aprovadas e consultas autorizadas | respostas e pedido de encaminhamento |
-
-Seletores e filtros do wireframe não são mecanismos de segurança. O servidor deverá validar papel + vínculo + recurso em cada operação. Responsável não recebe automaticamente conversas particulares do aluno; suporte não recebe todos os dados escolares.
-
-## 7. Dados fictícios para testar relações
-
-Lucas → 2º ano A; Bia → 2º ano B; Ana → responsável de Lucas e Bia; Marina → professora do 2º ano A.
-Um aviso de Marina deve aparecer para Lucas e Ana/Lucas; não deve aparecer para Ana/Bia.
-Esse conjunto valida a intenção de UX; não comprova autorização de produção.
-
-## 8. Critérios de passagem para alta fidelidade
-
-- [ ] Todos os CTAs essenciais têm destino e retorno.
-- [x] Contexto do estudante se mantém entre agenda e comunicados — roteiro local de 28/09.
-- [x] Publicação de aviso e leitura pelos destinatários passam no roteiro local de 28/09.
-- [x] Encaminhamento, resposta do suporte e acompanhamento passam no roteiro local de 28/09.
-- [ ] Mobile não esconde login nem sobrepõe controles essenciais.
-- [ ] Erros, vazio, confirmação e sessão indisponível têm tratamento.
-- [ ] Revisão com Henry/Eduardo e teste com representantes dos perfis registrados.
-- [ ] Oferta e conteúdo público confirmados; placeholders identificados.
-- [ ] Estado de baixa fidelidade preservado antes de aplicar alta.
-- [ ] Base visual: azul #0A192F, ciano #00F0FF e superfícies claras, sujeita à revisão de contraste; não usar ciano como texto pequeno sobre branco.
-- [ ] Alta fidelidade aplica tipografia, espaçamentos, componentes e imagens aos MESMOS fluxos, sem ampliar escopo.
-
-Não incluir notas, pagamentos, frequência, contratos, diagnóstico pedagógico com IA ou matrícula completa nesta etapa.
-
-## 9. Plano e indicadores
-
-| Trabalho | Responsáveis | Prazo | Indicador |
-|---|---|---|---|
-| Modelo conceitual e mapa de telas | Henry e Eduardo | Fase 1 | Cada tarefa tem entidade, perfil, destino e retorno |
-| Wireframe público | Henry e Eduardo | Primeira iteração | Inscrição e acesso navegáveis |
-| Wireframe interno | Henry e Eduardo | Próxima iteração | Fluxos por perfil e relações demonstradas |
-| Revisão de usabilidade | Henry e Eduardo | Dentro dos 30 dias | Contagem de tarefas concluídas sem ajuda, erros e facilidade percebida |
-| Alta fidelidade | Henry e Eduardo | Após estabilizar fluxo | Mesmos caminhos preservados e componentes consistentes |
-
-Meta de conclusão sem ajuda proposta: 85%, acompanhada de contagens por tarefa/perfil e limitações da amostra; não é resultado obtido.
-
-## 10. Evidências e estado
-
-A versão 3 do Make foi inspecionada em 27/09/2026. O histórico registra correção do botão Entrar mobile, nome acessível do menu e carrossel Flexbox/rodapé. Na sessão anterior foram percorridos interesse vazio, confirmação fictícia, login, recuperação e modal com Escape/retorno do foco.
-A expansão interna V0.2 foi exportada e evoluída localmente em 28/09. Evidências desta rodada constam em [relatório separado](docs/validacao-2026-09-28.md), com os limites da validação.
-O primeiro commit da fase versionou apenas documentação. O repositório agora contém o código exportado em `frontend/`, sem implantação pública.
+IA externa, recuperação de senha, captação persistida e deploy permanecem pendentes. O guia interativo não é IA integrada. O [README anterior](docs/readme-historico-2026-10-11.md) foi preservado como registro histórico; o schema Prisma prevalece sobre modelos antigos.

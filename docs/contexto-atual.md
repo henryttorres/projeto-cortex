@@ -1,21 +1,23 @@
 # Contexto atual — Cortéx
 
-Atualizado em 11/10/2026 (Bahia). Equipe: Henry, Eduardo, Joelly, Eduarda, Danilo e Luna. Responsabilidades ampliadas ainda propostas.
+Atualizado em 11/10/2026. Equipe: Henry, Eduardo, Joelly, Eduarda, Danilo e Luna.
 
-## Produto
-React/TypeScript/Vite, identidade aplicada, Sora/Source Sans 3 locais, landing e portais demonstrativos separados do portal integrado. Guide.tsx orienta atendimento; sem IA. Storytelling de quatro imagens pendente.
+## Implementação
 
-NestJS/Prisma/PostgreSQL: acesso, agenda, comunicados, chamados, distribuição automática e indicadores persistidos. Atendente ativa disponibilidade (lease 5min, renovação em aba visível); distribuição por menor carga, limite automático cinco por pessoa. Sem vaga, aguarda. Encerramento libera capacidade. Papéis supervisor/coordinator adicionados: consolidado institucional; suporte vê métricas próprias e chamados atribuídos/próprios/livres. Uma única operação, sem cadastro de equipes ou hierarquia organizacional vinculada.
+Base técnica 03b15d5: React/TypeScript/Vite, Sora/Source Sans 3, landing e demonstração separadas do portal integrado. NestJS/Prisma/PostgreSQL com login, agenda, comunicados, chamados, distribuição automática e indicadores de ciclos encerrados. Disponibilidade de atendente expira em 5min; capacidade automática cinco. CSAT após conclusão, reabertura preserva ciclos. Metas demonstrativas 4h/16h úteis, seg–sex 09–17h Bahia, sem feriados.
 
-Ciclos registram início/primeira resposta/encerramento/metas/CSAT. Relatório por ciclos encerrados em 7/30/90 dias, conforme pedido de Henry. SLA inicial 4h e resolução 16h úteis, seg–sex 09–17h Bahia, sem feriados. TMA decorrido, CSAT/adesão, série diária e tabela. Reabertura preserva ciclo/nota anterior. Histórico antigo não é reconstruído artificialmente. CSAT apenas solicitante após conclusão.
+Supervisor/coordenador ainda têm alcance institucional e permissões operacionais no código. Equipes, funcionários, transferência, escopo por equipe, SLA aberto e metas editáveis NÃO implementados. IA externa, recuperação e captação pendentes.
 
-## Ambiente e evidências
-PostgreSQL em %LOCALAPPDATA%/CortexRuntime, porta 54329; API 3001, Vite 5173. Retomada: scripts/iniciar-integracao.ps1. Não presumir processos ativos. Credenciais fictícias em .local-data/ACESSOS.md; supervisor/coordenador usam senha local do seed. Sem deploy público.
+## Organização desta entrega
 
-11/10: builds aprovados; 11 testes HTTP base, 9 suporte e 7 operação aprovados; três suítes Chrome headless aprovadas, incluindo atribuição automática, CSAT e painel supervisor. Capturas desktop/mobile em docs/evidencias/2026-10-11. Operação testada em schema temporário isolado. Relatório: docs/operacao-metricas-2026-10-11.md.
+README substituído por entrada atual; histórico preservado em docs/readme-historico-2026-10-11.md. Índice docs/README.md. Novos guias: equipes-entidades-permissoes.md (atual versus proposto), plano-90-dias.md, fluxo-git.md. Responsabilidades ampliadas são propostas. Workspace atualizado: terminal na raiz e tarefas de integração/API.
 
-## Segurança
-Contrato security/purple-team/agent.md; NVIDIA/NemoClaw cancelado. Auditor: 55 arquivos, dois falsos positivos contextuais de e-mails no seed. Retentativas concorrentes corrigidas e verificadas. Sem pentest independente, revisão completa de CVEs/cloud/histórico Git. Materiais anteriores de segurança preservados fora do commit.
+Branch prod recebeu por fast-forward os cinco commits de codex/integracao-postgresql-agenda. main permanece sem promoção. Fluxo pedido: prod → validação → main; proteção remota obrigatória não configurada. Preservados arquivos preexistentes não rastreados AGENTS.md, documentação integrada e security/.
 
-## Próximo passo
-Gestão de equipes/membros, redistribuição e separação supervisor/coordenador por equipe; depois backlog/SLA ativo, metas/feriados editáveis. Recuperação/captação continuam pendentes. Documento Google histórico não atualizado nesta sessão. Confirmar datas dos 90 dias; preservar arquivos preexistentes e usar dados fictícios.
+## Validação
+
+Nesta organização: sete documentos com links conferidos, JSON do workspace válido. Auditor local: 55 arquivos, dois avisos de interpolação de e-mail no seed (dados Prisma, não SQL dinâmico). Cobertura heurística limitada, sem garantia de segurança. Código da aplicação não alterado; builds/testes anteriores não repetidos. Evidência anterior: 27 testes HTTP/operação e três suítes de navegador aprovados, relatório operacao-metricas-2026-10-11.md.
+
+## Retomada
+
+Confirmar se ADMIN exclusivo significa gestão administrativa ou também retirar operações dos demais perfis. Depois implementar equipes/escopos/transferência e testes de acesso cruzado; somente então SLA aberto/metas. PostgreSQL local 54329, API 3001, Vite 5173; não presumir processos ativos. Preparação em backend/README.md, inicialização scripts/iniciar-integracao.ps1. Credenciais privadas .local-data/ACESSOS.md. VS Code deve abrir Cortex.code-workspace desta pasta; não sobrescrever outra cópia main modificada.
