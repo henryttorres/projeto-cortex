@@ -20,4 +20,4 @@ Contrato: security/purple-team/agent.md; NVIDIA/NemoClaw cancelado. Auditor: 48 
 Documento integrado histórico: https://docs.google.com/document/d/1MYRpzwEH-NyoWuL4gF0ijMTJeBLSPuTyJjUj7EihBl8/edit . Não atualizado remotamente; snapshot em docs/documentacao-integrada-2026-10-02.md.
 
 ## Próximo passo
-Recuperação real de acesso e captação persistida; definir canal de envio. Confirmar datas dos 90 dias e responsabilidades. Conferir branch/alterações antes de sincronizar; usar somente dados fictícios.
+Prioridade proposta: gestão e métricas do atendimento. Especificação em docs/gestao-metricas-atendimento.md: gestor/equipe, SLA útil, ciclos, CSAT e dashboard. Ainda não implementados. Henry autorizou metas demonstrativas; proposta 09–17h seg–sex, 4h úteis para primeira resposta e 16h para resolução. Recuperação/captação continuam pendentes. Confirmar datas dos 90 dias e responsabilidades. Conferir branch/alterações antes de sincronizar; usar somente dados fictícios.
