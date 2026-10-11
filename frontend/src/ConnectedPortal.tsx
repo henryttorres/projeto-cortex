@@ -5,6 +5,7 @@ import { api, ApiError, endSession, User } from './api';
 export { login, restoreSession, ApiError } from './api';
 export type { User } from './api';
 import Communications from './Communications';
+import Tickets from './Tickets';
 type Student = { id: string; name: string; enrollments: { schoolClass: SchoolClass }[] };
 type SchoolClass = { id: string; name: string; period: string };
 type AgendaItem = { id: string; title: string; description: string; location: string; startsAt: string; endsAt: string };
@@ -20,10 +21,11 @@ export default function ConnectedPortal({ user, onLogout }: { user: User; onLogo
   const [notice, setNotice] = useState('');
   const [saving, setSaving] = useState(false);
   const [refresh, setRefresh] = useState(0);
-  const [section, setSection] = useState<'agenda' | 'communications'>('agenda');
+  const [section, setSection] = useState<'agenda' | 'communications' | 'support'>(user.roles.includes('support') ? 'support' : 'agenda');
   const [draftActive, setDraftActive] = useState(false);
   const requestId = useRef(0);
   const canWrite = user.roles.some(r => r === 'teacher' || r === 'admin');
+  const academicAccess = user.roles.some(r => ['student', 'guardian', 'teacher', 'admin'].includes(r));
   const contextOptions = canWrite ? classes : students;
   const context = contextOptions.find(item => item.id === selected);
 
@@ -71,20 +73,23 @@ export default function ConnectedPortal({ user, onLogout }: { user: User; onLogo
   }
 
   return <div className="connected-shell">
-    <header className="connected-header"><img src="/brand/cortex-logo.png" alt="Cortéx Instituto de Aprendizagem" /><button className="button button--secondary" onClick={logout}>Sair da conta</button></header>
+    <header className="connected-header"><img src="/brand/cortex-logo.png" alt="Cortéx Instituto de Aprendizagem" /><button className="button button--secondary" disabled={draftActive} onClick={logout}>Sair da conta</button></header>
     <main className="connected-main">
       <p className="eyebrow">{user.roles.map(role => roleLabels[role]).join(' · ')}</p>
-      <h1>Olá, {user.name}.</h1><p className="lead">Sua rotina de aprendizagem, em um só lugar.</p>
-      <p className="connected-note">Ambiente de desenvolvimento com dados fictícios. Acesso, agenda e comunicados conectados ao banco.</p>
+      <h1>Olá, {user.name}.</h1><p className="lead">{academicAccess ? 'Sua rotina de aprendizagem, em um só lugar.' : 'O atendimento da comunidade, em um só lugar.'}</p>
+      <p className="connected-note">Ambiente de desenvolvimento com dados fictícios. Acesso, agenda, comunicados e atendimento conectados ao banco.</p>
       <nav className="connected-nav" aria-label="Serviços do portal">
-        <button className="button button--secondary" aria-current={section === 'agenda' ? 'page' : undefined} disabled={draftActive} onClick={() => setSection('agenda')}>Agenda</button>
-        <button className="button button--secondary" aria-current={section === 'communications' ? 'page' : undefined} onClick={() => setSection('communications')}>Comunicados</button>
+        {academicAccess && <button className="button button--secondary" aria-current={section === 'agenda' ? 'page' : undefined} disabled={draftActive} onClick={() => setSection('agenda')}>Agenda</button>}
+        {academicAccess && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'communications' ? 'page' : undefined} onClick={() => setSection('communications')}>Comunicados</button>}
+        <button className="button button--secondary" disabled={draftActive} aria-current={section === 'support' ? 'page' : undefined} onClick={() => setSection('support')}>Atendimento</button>
       </nav>
-      <section className="connected-card" aria-label="Contexto acadêmico">
+      {draftActive && <p role="status">Conclua ou descarte o rascunho antes de navegar ou sair da conta.</p>}
+      {section !== 'support' && <section className="connected-card" aria-label="Contexto acadêmico">
         {contextOptions.length > 0 && <div className="field"><label htmlFor="real-context">{canWrite ? 'Turma' : 'Estudante'}</label><select id="real-context" disabled={draftActive} value={selected} onChange={event => { setSelected(event.target.value); setNotice(''); }}>{contextOptions.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}
         {context && <h3>{context.name}</h3>}
         {draftActive && <p>Conclua ou descarte o rascunho para trocar de turma ou abrir a agenda.</p>}
-      </section>
+      </section>}
+      {section === 'support' && <Tickets user={user} onSessionExpired={onLogout} onDraftChange={setDraftActive} />}
       {section === 'communications' && selected && <Communications key={selected} contextId={selected} contextName={context?.name || ''} canWrite={canWrite} onSessionExpired={onLogout} onDraftChange={setDraftActive} />}
       {section === 'communications' && !selected && <p role="status">{loading ? 'Carregando vínculos…' : error || 'Nenhum vínculo acadêmico disponível para esta conta.'}</p>}
       {section === 'agenda' && <section className="connected-card" aria-labelledby="agenda-title">

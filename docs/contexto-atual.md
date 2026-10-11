@@ -1,21 +1,23 @@
 # Contexto atual — Cortéx
 
-Atualizado em 10/10/2026. Equipe: Henry, Eduardo, Joelly, Eduarda, Danilo e Luna. Responsabilidades ampliadas ainda propostas.
+Atualizado em 10/10/2026 (Bahia). Equipe: Henry, Eduardo, Joelly, Eduarda, Danilo e Luna. Responsabilidades ampliadas ainda propostas.
 
 ## Produto
-React/TypeScript/Vite, identidade aplicada, Sora/Source Sans 3 locais, logo PNG, landing, vídeo sem áudio e cinco portais demonstrativos. Guide.tsx segue com botões, sem IA. Storytelling de quatro imagens pendente.
+React/TypeScript/Vite, identidade aplicada, Sora/Source Sans 3 locais, logo PNG, landing, vídeo sem áudio e cinco portais demonstrativos. Guide.tsx orienta atendimento autenticado; sem IA. Storytelling de quatro imagens pendente.
 
-NestJS 11 + Prisma 6.19 + PostgreSQL 17.11: login/sessão/logout, vínculos verificados, agenda com publicação e agora comunicados por turma. Professora/admin escreve, revisa e publica; aluno/responsável lista e lê conforme vínculo e matrícula ativa. Reenvio idempotente evita duplicação. Rascunho somente local, sem anexos/edição/recibo/paginação. Modelo em backend/prisma; migrações de acesso/agenda e comunicados. Portal conectado separado da demonstração. Chamados, captação, recuperação e gestão completa ainda não integrados; sem deploy público/LLM.
+NestJS 11 + Prisma 6.19 + PostgreSQL 17.11: login/sessão/logout, vínculos verificados, agenda, comunicados e chamados persistidos. Comunicados: revisão/publicação/leitura por turma. Atendimento: abertura revisada, protocolo, fila paginada, atribuição, respostas, encerramento justificado e reabertura. Solicitante vê somente seus chamados; suporte/admin veem fila, sem ampliar acesso acadêmico. Suporte responde nos atribuídos; admin tem exceção explícita. Transações/versão e IDs idempotentes protegem concorrência e reenvio. Rascunhos locais, sem anexos/notificações.
+
+Portal conectado separado da demonstração. Captação, recuperação e gestão completa ainda não integradas; sem deploy público/LLM. Modelos/migrações em backend/prisma.
 
 ## Ambiente e evidências
-PostgreSQL dedicado em %LOCALAPPDATA%/CortexRuntime, porta 54329, SCRAM/loopback; sem serviço Windows. API 3001, Vite 5173. Retomada: scripts/iniciar-integracao.ps1 e backend/README.md. Não presumir processos ativos. Credenciais fictícias em .local-data/ACESSOS.md; segredos ignorados pelo Git.
+PostgreSQL dedicado em %LOCALAPPDATA%/CortexRuntime, porta 54329, SCRAM/loopback; sem serviço Windows. API 3001, Vite 5173. Retomada: scripts/iniciar-integracao.ps1 e backend/README.md. Não presumir processos ativos. Credenciais fictícias: .local-data/ACESSOS.md, ignoradas pelo Git.
 
-10/10: builds API/front, 11 testes HTTP com PostgreSQL e duas suítes Chrome headless aprovados. Verificados acesso/agenda, revisão/publicação/leitura, autorização, resposta perdida e reenvio único, recarga e mobile 390px. Capturas em docs/evidencias/2026-10-10. Fonte: docs/comunicados-2026-10-10.md; marco anterior em docs/integracao-backend-2026-10-10.md. Não equivale a auditoria completa de segurança/acessibilidade.
+10/10: builds, 11 testes HTTP anteriores + 9 de suporte, três suítes Chrome headless aprovados. Validados IDOR, papéis/contas revogados, CSRF/origem, atribuição concorrente, reenvio, texto inerte, persistência e mobile 390px. Relatórios: docs/chamados-2026-10-10.md e docs/seguranca-atendimento-2026-10-10.md. Evidências do suporte em docs/evidencias/2026-10-11 (data UTC). Não certifica ausência de vulnerabilidades.
 
 ## Segurança e documentação
-Contrato: security/purple-team/agent.md; NVIDIA/NemoClaw cancelado. Auditor: 41 arquivos, falso positivo contextual no e-mail do seed; consultas Prisma. npm audit sem alertas na etapa anterior, não repetido sem mudança de dependências. Materiais anteriores de segurança preservados, fora do commit deste marco.
+Contrato: security/purple-team/agent.md; NVIDIA/NemoClaw cancelado. Auditor: 48 arquivos, falso positivo contextual no e-mail do seed. Sem revisão completa do histórico Git/CVEs/infra cloud neste marco. Materiais anteriores de segurança preservados fora do commit.
 
 Documento integrado histórico: https://docs.google.com/document/d/1MYRpzwEH-NyoWuL4gF0ijMTJeBLSPuTyJjUj7EihBl8/edit . Não atualizado remotamente; snapshot em docs/documentacao-integrada-2026-10-02.md.
 
 ## Próximo passo
-Integrar chamados/fila de suporte; depois captação/recuperação. Confirmar datas dos 90 dias e responsabilidades. Conferir branch/alterações antes de sincronizar; preservar arquivos preexistentes. Usar apenas dados fictícios.
+Recuperação real de acesso e captação persistida; definir canal de envio. Confirmar datas dos 90 dias e responsabilidades. Conferir branch/alterações antes de sincronizar; usar somente dados fictícios.

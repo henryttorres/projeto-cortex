@@ -3,16 +3,17 @@
 ## Estado atual — 10/10/2026
 
 Primeira integração real disponível: **NestJS + Prisma + PostgreSQL**, com login,
-sessão, vínculos autorizados, agenda e comunicados persistidos. Professora publica compromissos e avisos
+sessão, vínculos autorizados, agenda, comunicados e chamados persistidos. Professora publica compromissos e avisos
 para sua turma; aluno e responsável consultam apenas seus vínculos. O portal
 demonstrativo anterior permanece separado.
 
 Preparação e acessos: [backend/README.md](backend/README.md).
 Resultados e limites: [relatório da integração](docs/integracao-backend-2026-10-10.md).
 Marco seguinte: [comunicados por turma e próximos passos](docs/comunicados-2026-10-10.md).
+Entrega mais recente: [chamados e fila de suporte](docs/chamados-2026-10-10.md), com [revisão Purple Team](docs/seguranca-atendimento-2026-10-10.md).
 Localhost: http://127.0.0.1:5173 (requer API e banco ativos).
 
-Chamados, interesse, recuperação de senha, IA e implantação pública
+Interesse, recuperação de senha, IA e implantação pública
 ainda não estão integrados. Não usar dados pessoais reais no ambiente de teste.
 
 ## Histórico do protótipo — 28/09/2026

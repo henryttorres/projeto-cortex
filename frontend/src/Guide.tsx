@@ -80,7 +80,7 @@ export default function Guide({ onNavigate, onSignup, onLogin }: Props) {
           <button className="button button--secondary" onClick={() => navigate("como-funciona")}>Entender as etapas</button>
         </>}
         {topic === "team" && <>
-          <div className="guide-bubble"><h3>Atendimento da equipe</h3><p>O canal público de atendimento ainda será definido. Não há atendente ou fila real conectados aqui.</p><p>No portal de demonstração, você pode explorar o fluxo de chamado: resumo → revisão → acompanhamento da resposta.</p></div>
+          <div className="guide-bubble"><h3>Atendimento da equipe</h3><p>Já tem cadastro? Entre no portal e abra Atendimento para criar um chamado e acompanhar as respostas da equipe.</p><p>O atendimento exige uma conta. O canal para visitantes ainda será definido. Este ambiente usa dados fictícios e não oferece atendimento em tempo real.</p></div>
           <button className="button button--primary" onClick={() => go(onLogin)}>Ir ao acesso do portal</button>
           <button className="button button--secondary" onClick={() => navigate("duvidas")}>Consultar dúvidas frequentes</button>
         </>}

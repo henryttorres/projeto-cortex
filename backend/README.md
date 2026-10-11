@@ -1,4 +1,4 @@
-# API Cortéx — acesso, agenda e comunicados
+# API Cortéx — acesso, agenda, comunicados e atendimento
 
 Primeira integração funcional: NestJS/TypeScript, Prisma e PostgreSQL. Dados de
 demonstração são fictícios. Não é implantação de produção.
@@ -68,6 +68,10 @@ integrada; a tela antiga permanece explicitamente simulada.
 | GET | /classes/:id/communications | Lista da turma autorizada |
 | GET | /classes/:id/communications/:communicationId | Detalhe da turma autorizada |
 | POST | /classes/:id/communications | Professor da turma ou admin; sessão, origem e CSRF |
+| GET | /tickets | Próprios chamados; suporte/admin veem a fila; paginação/status |
+| POST | /tickets | Solicitante vem da sessão; abertura idempotente |
+| GET | /tickets/:id | Autorização por objeto; histórico paginado |
+| POST | /tickets/:id/actions | Assumir, responder, encerrar ou reabrir conforme perfil, atribuição e versão |
 
 Corpo da criação: `title`, `description`, `location`, `startsAt` e `endsAt` em ISO
 8601. O servidor e o banco exigem término posterior ao início. Campos extras são
@@ -93,7 +97,7 @@ sessões expiradas, estratégia de rate limit distribuído se houver múltiplas
 instâncias, política de dados, backups e observabilidade. O rate limit atual é
 local à instância. Não há isolamento multiescola implementado.
 
-Interesse, chamados e administração completa permanecem no portal
+Interesse e administração completa permanecem no portal
 de demonstração separado. Não misturar dados simulados com o portal autenticado.
 O assistente ainda é guiado por botões, sem LLM.
 
@@ -110,6 +114,12 @@ Chrome headless separado do navegador do usuário e grava capturas em
 `npm run test:communications:ui`: testa revisão, publicação, resposta perdida após
 gravação, reenvio sem duplicação, leitura por vínculo, recarga e layout mobile.
 Requer os mesmos serviços e dados fictícios. Registros criados são removidos ao final.
+
+`npm run test:support`: testes HTTP sintéticos de autorização, concorrência,
+idempotência, paginação e limitação de requisições. `npm run test:support:ui`:
+fluxo completo com revisão, resposta perdida, atendimento, reabertura e texto inerte.
+Contrato da API e operação: `docs/chamados-2026-10-10.md` na raiz do projeto.
+Revisão e limitações: `docs/seguranca-atendimento-2026-10-10.md`.
 
 Na raiz: `node security/purple-team/audit.mjs` e `pnpm --dir frontend build`.
 O auditor é heurístico; seu resultado não equivale a teste completo de segurança.

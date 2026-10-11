@@ -13,6 +13,8 @@
 .connected-card select, .connected-card input, .connected-card textarea { max-width: 100%; min-width: 0; }
 .connected-nav, .communication-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .connected-nav [aria-current="page"] { background: #102b3f; border-color: #102b3f; color: white; }
+.connected-nav button[aria-current="page"]:hover, .connected-nav button[aria-current="page"]:focus { background: #102b3f; color: white; }
+.connected-shell button:disabled { opacity: .55; cursor: not-allowed; }
 .communication-panel h2 { margin: .5rem 0 0; }
 .communication-panel h2:focus-visible { outline: 2px solid #16666b; outline-offset: 6px; }
 .communication-list { display: grid; gap: 1rem; }
@@ -25,4 +27,18 @@
 .communication-empty { padding: 2rem 0; }
 .communication-panel textarea { resize: vertical; }
 .communication-actions { margin-top: 1rem; }
+.ticket-panel { overflow-wrap: anywhere; }
+.ticket-panel h2 { margin: .5rem 0; }
+.ticket-panel h2:focus-visible { outline: 2px solid #16666b; outline-offset: 5px; }
+.ticket-filters { margin-top: 1.5rem; }
+.ticket-status { display: inline-block; padding: .35rem .7rem; font-size: .85rem; font-weight: 700; border-radius: 6px; background: #eaf1f6; color: #173b58; }
+.ticket-status--in_progress { background: #fff2d3; color: #634400; }
+.ticket-status--resolved { background: #e4f3eb; color: #145236; }
+.ticket-timeline { list-style: none; padding: 0 0 0 1rem; border-left: 2px solid #b5d7d0; }
+.ticket-timeline li { padding: 1rem; margin-bottom: 1rem; background: #f3f8f7; border-radius: 10px; }
+.ticket-timeline .eyebrow { display: block; margin-bottom: .5rem; }
+.ticket-timeline time { display: block; font-size: .9rem; color: #435b63; }
+.ticket-message { white-space: pre-wrap; margin-top: .75rem; }
+.ticket-composer { margin-top: 2rem; border-top: 1px solid #d5e3df; padding-top: 1.5rem; }
+.ticket-retry { background: #fff2d3; padding: 1rem; border-radius: 10px; margin: 1rem 0; }
 @media(max-width: 600px) { .connected-dates { grid-template-columns: 1fr; } .connected-main { padding-top: 1.5rem; } }

@@ -1,0 +1,102 @@
+import { chromium, expect } from '@playwright/test';
+import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import { mkdir } from 'node:fs/promises';
+const db = new PrismaClient();
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+const page = await context.newPage();
+const title = `Ajuda com acesso — ${randomUUID().slice(0, 8)}`;
+const description = 'Não encontro o material da oficina. Como posso consultá-lo?';
+const evidence = '../docs/evidencias/2026-10-11';
+const errors = [];
+page.on('pageerror', err => errors.push(err.message));
+await mkdir(evidence, { recursive: true });
+async function login(name) {
+  await page.getByLabel('E-mail', { exact: true }).fill(`${name}@demo.cortex.test`);
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.DEMO_PASSWORD);
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await page.getByRole('button', { name: 'Atendimento', exact: true }).click();
+}
+async function open() { await page.getByRole('button', { name: `Abrir chamado: ${title}`, exact: true }).click(); await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible(); }
+try {
+  await page.goto('http://127.0.0.1:5173');
+  await page.getByRole('button', { name: 'Já tenho cadastro', exact: true }).first().click();
+  await login('ana');
+  await page.getByRole('button', { name: 'Abrir chamado', exact: true }).click();
+  await page.getByLabel('Assunto', { exact: true }).fill(title);
+  await page.getByLabel('Descrição do pedido', { exact: true }).fill(description);
+  await page.getByRole('button', { name: 'Revisar chamado', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Revisar chamado', exact: true })).toBeFocused();
+  if (await db.ticket.count({ where: { title } })) throw new Error('Revisão gravou chamado antes da confirmação');
+  await page.getByRole('button', { name: 'Voltar e editar' }).click();
+  await expect(page.getByLabel('Descrição do pedido')).toHaveValue(description);
+  await page.getByRole('button', { name: 'Revisar chamado', exact: true }).click();
+  await page.route('**/api/tickets', async route => {
+    if (route.request().method() === 'POST') { await route.fetch(); await route.abort('failed'); } else await route.continue();
+  });
+  await page.getByRole('button', { name: 'Confirmar abertura' }).click();
+  await expect(page.getByRole('button', { name: 'Confirmar tentativa anterior' })).toBeVisible();
+  await page.unroute('**/api/tickets');
+  await page.getByRole('button', { name: 'Confirmar tentativa anterior' }).click();
+  await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+  if (await db.ticket.count({ where: { title } }) !== 1) throw new Error('Abertura duplicada após reenvio');
+  await page.getByRole('button', { name: 'Sair da conta' }).click();
+  await login('suporte');
+  await expect(page.getByRole('heading', { name: 'Fila de suporte' })).toBeVisible();
+  await page.screenshot({ path: `${evidence}/suporte-fila-desktop.png`, fullPage: true });
+  await open();
+  await expect(page.getByLabel('Sua mensagem')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Assumir chamado' }).click();
+  await page.getByLabel('Sua mensagem').fill('Abra Comunicados e selecione o estudante para consultar as orientações.');
+  await page.getByRole('button', { name: 'Revisar resposta', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirmar resposta' }).click();
+  await expect(page.getByText('Abra Comunicados e selecione o estudante para consultar as orientações.', { exact: true })).toBeVisible();
+  await page.getByLabel('Sua mensagem').fill('Orientação concluída. Se precisar, reabra este chamado.');
+  await page.getByLabel('Após enviar').selectOption('resolve');
+  await page.getByRole('button', { name: 'Revisar resposta', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirmar encerramento' }).click();
+  await expect(page.locator('.ticket-status')).toHaveText('Encerrado');
+  await page.getByRole('button', { name: 'Sair da conta' }).click();
+  await login('lucas');
+  await expect(page.getByText('Carregando chamados…')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: `Abrir chamado: ${title}`, exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sair da conta' }).click();
+  await login('ana');
+  await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: `${evidence}/suporte-historico-mobile.png`, fullPage: true });
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw new Error('Overflow mobile');
+  await page.getByRole('button', { name: 'Reabrir chamado' }).click();
+  await expect(page.locator('.ticket-status')).toHaveText('Aberto');
+  const xss = '<img src=x onerror="window.cortexInjected=true">';
+  await page.getByLabel('Sua mensagem').fill(xss);
+  await page.getByRole('button', { name: 'Revisar resposta', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirmar resposta' }).click();
+  await expect(page.locator('.ticket-timeline').getByText(xss, { exact: true })).toBeVisible();
+  if (await page.evaluate(() => window.cortexInjected === true)) throw new Error('HTML executado');
+  await expect(page.locator('.ticket-timeline img')).toHaveCount(0);
+  // Simular outra sessão da equipe encerrando enquanto há rascunho local.
+  await page.getByLabel('Sua mensagem').fill('Rascunho ainda não enviado.');
+  const synthetic = await db.ticket.findFirstOrThrow({ where: { title } });
+  const admin = await db.account.findUniqueOrThrow({ where: { email: 'admin@demo.cortex.test' } });
+  await db.ticket.update({ where: { id: synthetic.id }, data: { status: 'resolved', assigneeId: admin.id, version: { increment: 1 }, entries: { create: { authorId: admin.id, action: 'resolve', message: 'Encerramento concorrente sintético.' } } } });
+  await page.getByRole('button', { name: 'Atualizar histórico' }).click();
+  await expect(page.getByText('O chamado mudou ou deixou de estar disponível.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Descartar resposta' }).click();
+  await expect(page.getByRole('button', { name: 'Voltar aos chamados' })).toBeEnabled();
+  await page.reload();
+  await page.getByRole('button', { name: 'Atendimento', exact: true }).click();
+  await open();
+  await expect(page.locator('.ticket-timeline').getByText(xss, { exact: true })).toBeVisible();
+  // Uma sessão encerrada em outra aba precisa retirar acesso também desta tela.
+  const status = await page.evaluate(async () => { const session = await fetch('/api/auth/me').then(r => r.json()); return (await fetch('/api/auth/logout', { method: 'POST', headers: { 'X-CSRF-Token': session.csrfToken } })).status; });
+  if (status !== 201) throw new Error('Logout sintético falhou');
+  await page.getByRole('button', { name: 'Atualizar histórico' }).click();
+  await expect(page.getByRole('heading', { name: 'Já tenho cadastro', exact: true })).toBeVisible();
+  if (errors.length) throw new Error(`Erros de página: ${errors.length}`);
+  console.log('UI suporte: revisão, reenvio único, fila, atribuição, resposta, encerramento, isolamento, reabertura, texto inerte, persistência, mobile e sessão revogada aprovados.');
+} finally {
+  await db.ticket.deleteMany({ where: { title, description } });
+  await db.$disconnect(); await context.close(); await browser.close();
+}

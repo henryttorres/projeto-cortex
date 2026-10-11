@@ -24,6 +24,9 @@ model Account {
   teachings Teaching[]
   sessions Session[]
   communications Communication[]
+  tickets Ticket[] @relation("Requester")
+  assignedTickets Ticket[] @relation("Assignee")
+  ticketEntries TicketEntry[]
   createdAt DateTime @default(now())
 }
 model AccountRole {
@@ -113,4 +116,43 @@ model CommunicationClass {
   schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
   @@id([communicationId, classId])
   @@index([classId])
+}
+enum TicketStatus {
+  open
+  in_progress
+  resolved
+}
+enum TicketAction {
+  opened
+  reply
+  claim
+  resolve
+  reopen
+}
+model Ticket {
+  id String @id @default(uuid()) @db.Uuid
+  requesterId String @db.Uuid
+  assigneeId String? @db.Uuid
+  title String @db.VarChar(120)
+  description String @db.VarChar(5000)
+  status TicketStatus @default(open)
+  version Int @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  requester Account @relation("Requester", fields: [requesterId], references: [id], onDelete: Restrict)
+  assignee Account? @relation("Assignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  entries TicketEntry[]
+  @@index([requesterId, updatedAt, id])
+  @@index([status, updatedAt, id])
+}
+model TicketEntry {
+  id String @id @default(uuid()) @db.Uuid
+  ticketId String @db.Uuid
+  authorId String @db.Uuid
+  action TicketAction
+  message String @db.VarChar(5000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author Account @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  @@index([ticketId, createdAt, id])
 }
