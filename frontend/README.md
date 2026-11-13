@@ -12,7 +12,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Abrir http://127.0.0.1:5173/. Para verificar os tipos e gerar a distribuição:
+Abrir http://127.0.0.1:5174/. Para verificar os tipos e gerar a distribuição:
 
 ```sh
 pnpm build

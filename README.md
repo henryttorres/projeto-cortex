@@ -1,8 +1,8 @@
 # Cortéx Instituto de Aprendizagem
 
-## Estado atual — 28/09/2026
+## Estado atual — 13/11/2026
 
-Protótipo de baixa fidelidade exportado do Figma Make e executável localmente em **[frontend/](frontend/README.md)**. O HTML anterior está em `referencias/landing-antiga.html`. Abra [Cortex.code-workspace](Cortex.code-workspace) no VS Code e siga [COMECE-AQUI.md](COMECE-AQUI.md).
+Site institucional e protótipo navegável executável localmente em **[frontend/](frontend/README.md)**. O HTML anterior está em `referencias/landing-antiga.html`. Abra [Cortex.code-workspace](Cortex.code-workspace) no VS Code e siga [COMECE-AQUI.md](COMECE-AQUI.md).
 
 ### Executar localmente
 
@@ -25,7 +25,7 @@ Opção 2: execução automatizada com menu:
 .\scripts\menu_cortex.bat
 ```
 
-O menu verifica Node e pnpm, instala dependências ausentes e inicia o Vite em localhost. Não instala ferramentas globais nem encerra processos por porta. O projeto será aberto em http://127.0.0.1:5173/.
+O menu verifica Node e pnpm, instala dependências ausentes e inicia o Vite em localhost. Não instala ferramentas globais nem encerra processos por porta. O projeto será aberto em http://127.0.0.1:5174/.
 
 Validação de build:
 
@@ -36,7 +36,22 @@ pnpm build
 
 `pnpm build` verifica TypeScript e gera o build da aplicação.
 
-Atendimento com histórico e revisão de encerramento. [Resultados, evidências e pendências](docs/validacao-2026-09-28.md). Dados fictícios em memória; sem backend, autenticação real ou IA conectada. Alterações locais não sincronizam automaticamente com o Figma.
+Atendimento com histórico e revisão de encerramento. [Resultados, evidências e pendências](docs/validacao-2026-09-28.md). Os fluxos do site institucional continuam usando dados em memória; o backend de IA descrito abaixo é independente e ainda não está conectado às telas do site. Alterações locais não sincronizam automaticamente com o Figma.
+
+### Backend de integração (experimental)
+
+A API Express fornece endpoints para processamento de PDFs, chat com o agente Cortéx, consulta de lacunas de aprendizagem e diagnóstico pedagógico. Ela é uma integração separada do site institucional nesta versão.
+
+1. Copie `backend/.env.example` para `backend/.env` e preencha `DATABASE_URL` e `OPENAI_API_KEY`. O banco PostgreSQL deve ter a extensão `pgvector`.
+2. No PowerShell, instale e inicie a API:
+
+```powershell
+cd .\backend
+npm install
+npm run dev
+```
+
+A API inicia em `http://127.0.0.1:3001`; verifique a disponibilidade em `/api/health`. Consulte [docs/arquitetura-saas.md](docs/arquitetura-saas.md) para detalhes. Não coloque credenciais reais nos arquivos `.env.example`.
 
 ### Menu de desenvolvimento
 
@@ -58,7 +73,7 @@ Também há suporte de parada e abertura direta:
 
 1. Execute [scripts/menu_cortex.bat](scripts/menu_cortex.bat) a partir da raiz do projeto
 2. Escolha a opção para iniciar o projeto
-3. Aguarde a inicialização do Vite em http://127.0.0.1:5173/
+3. Aguarde a inicialização do Vite em http://127.0.0.1:5174/
 4. Abra a URL no navegador
 5. Valide a landing e os fluxos de demonstração
 6. Para encerrar, use `Ctrl+C` no terminal de execução; [scripts/parar_cortex.bat](scripts/parar_cortex.bat) apenas mostra instruções

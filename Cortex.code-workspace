@@ -29,7 +29,7 @@
     "explorer.fileNesting.patterns": {
       "package.json": "pnpm-lock.yaml, tsconfig.json, vite.config.ts"
     },
-    "terminal.integrated.cwd": "${workspaceFolder}/frontend",
+    "terminal.integrated.cwd": "${workspaceFolder}",
     "terminal.integrated.env.windows": {
       "PATH": "${env:PATH};${env:USERPROFILE}\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;${env:USERPROFILE}\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback"
     },
@@ -43,7 +43,7 @@
     },
     "tasks": [
       {
-        "label": "Cortéx: 1. Instalar dependências",
+        "label": "Cortéx: Instalar frontend",
         "type": "shell",
         "command": "pnpm",
         "args": [
@@ -56,7 +56,7 @@
         "problemMatcher": []
       },
       {
-        "label": "Cortéx: 2. Iniciar site",
+        "label": "Cortéx: Iniciar frontend (5174)",
         "type": "shell",
         "command": "pnpm",
         "args": [
@@ -87,7 +87,7 @@
         }
       },
       {
-        "label": "Cortéx: 3. Verificar e gerar build",
+        "label": "Cortéx: Build frontend",
         "type": "shell",
         "command": "pnpm",
         "args": [
@@ -103,7 +103,7 @@
         "problemMatcher": "$tsc"
       },
       {
-        "label": "Cortéx: 4. Visualizar build",
+        "label": "Cortéx: Visualizar build frontend",
         "type": "shell",
         "command": "pnpm",
         "args": [
@@ -117,6 +117,30 @@
           "reveal": "always",
           "panel": "dedicated"
         }
+      },
+      {
+        "label": "Cortéx: Instalar backend",
+        "type": "shell",
+        "command": "npm",
+        "args": ["install"],
+        "windows": { "command": "npm.cmd" },
+        "options": { "cwd": "${workspaceFolder}/backend" },
+        "problemMatcher": []
+      },
+      {
+        "label": "Cortéx: Iniciar agente API (3001)",
+        "type": "shell",
+        "command": "npm",
+        "args": ["run", "dev"],
+        "windows": { "command": "npm.cmd" },
+        "options": { "cwd": "${workspaceFolder}/backend" },
+        "isBackground": true,
+        "problemMatcher": {
+          "owner": "cortex-api",
+          "pattern": { "regexp": "^(.*)$", "message": 1 },
+          "background": { "activeOnStart": true, "beginsPattern": ".*Cortéx Backend.*", "endsPattern": ".*Health:.*3001.*" }
+        },
+        "presentation": { "reveal": "always", "panel": "dedicated" }
       }
     ]
   }
