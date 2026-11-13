@@ -36,11 +36,11 @@ pnpm build
 
 `pnpm build` verifica TypeScript e gera o build da aplicação.
 
-Atendimento com histórico e revisão de encerramento. [Resultados, evidências e pendências](docs/validacao-2026-09-28.md). Os fluxos do site institucional continuam usando dados em memória; o backend de IA descrito abaixo é independente e ainda não está conectado às telas do site. Alterações locais não sincronizam automaticamente com o Figma.
+Atendimento com histórico e revisão de encerramento. [Resultados, evidências e pendências](docs/validacao-2026-09-28.md). Os fluxos institucionais e os portais demonstrativos continuam usando dados em memória. A seção **Painéis de IA** e o **Guia Cortéx** oferecem acesso aos ambientes de aluno e professor conectados à API experimental; esses painéis não têm autenticação nem controle de acesso. Alterações locais não sincronizam automaticamente com o Figma.
 
 ### Backend de integração (experimental)
 
-A API Express fornece endpoints para processamento de PDFs, chat com o agente Cortéx, consulta de lacunas de aprendizagem e diagnóstico pedagógico. Ela é uma integração separada do site institucional nesta versão.
+A API Express fornece endpoints para processamento de PDFs, chat com o agente Cortéx, consulta de lacunas de aprendizagem e diagnóstico pedagógico. Os painéis de IA do aluno e do professor consomem esses endpoints; os demais fluxos institucionais continuam separados.
 
 1. Copie `backend/.env.example` para `backend/.env` e preencha `DATABASE_URL` e `OPENAI_API_KEY`. O banco PostgreSQL deve ter a extensão `pgvector`.
 2. No PowerShell, instale e inicie a API:
@@ -51,7 +51,7 @@ npm install
 npm run dev
 ```
 
-A API inicia em `http://127.0.0.1:3001`; verifique a disponibilidade em `/api/health`. Consulte [docs/arquitetura-saas.md](docs/arquitetura-saas.md) para detalhes. Não coloque credenciais reais nos arquivos `.env.example`.
+A API inicia em `http://127.0.0.1:3001`; verifique a disponibilidade em `/api/health`. O frontend usa essa URL por padrão; defina `VITE_API_BASE` se a API estiver em outro endereço. Consulte [docs/arquitetura-saas.md](docs/arquitetura-saas.md) para detalhes. Não coloque credenciais reais nos arquivos `.env.example`.
 
 ### Menu de desenvolvimento
 

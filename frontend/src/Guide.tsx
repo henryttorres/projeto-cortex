@@ -2,9 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import "./guide.css";
 
 type Topic = "start" | "join" | "team" | "technology";
-type Props = { onNavigate: (id: string) => void; onSignup: () => void; onLogin: () => void };
+type Props = {
+  onNavigate: (id: string) => void;
+  onSignup: () => void;
+  onLogin: () => void;
+  onOpenAIPanel: (role: "student" | "teacher") => void;
+};
 
-export default function Guide({ onNavigate, onSignup, onLogin }: Props) {
+export default function Guide({ onNavigate, onSignup, onLogin, onOpenAIPanel }: Props) {
   const [open, setOpen] = useState(false);
   const [topic, setTopic] = useState<Topic>("start");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -69,6 +74,8 @@ export default function Guide({ onNavigate, onSignup, onLogin }: Props) {
             <button onClick={() => navigate("proposta")}>Conhecer a proposta <span aria-hidden="true">↗</span></button>
             <button onClick={() => choose("join")}>Como participar <span aria-hidden="true">→</span></button>
             <button onClick={() => go(onLogin)}>Acessar meu portal <span aria-hidden="true">↗</span></button>
+            <button onClick={() => go(() => onOpenAIPanel("student"))}>Painel de IA do aluno <span aria-hidden="true">↗</span></button>
+            <button onClick={() => go(() => onOpenAIPanel("teacher"))}>Painel de IA do professor <span aria-hidden="true">↗</span></button>
             <button onClick={() => choose("team")}>Falar com a equipe <span aria-hidden="true">→</span></button>
             <button onClick={() => navigate("acontece")}>Ver novidades e atividades <span aria-hidden="true">↗</span></button>
             <button onClick={() => choose("technology")}>Como a IA será utilizada? <span aria-hidden="true">→</span></button>
@@ -85,8 +92,10 @@ export default function Guide({ onNavigate, onSignup, onLogin }: Props) {
           <button className="button button--secondary" onClick={() => navigate("duvidas")}>Consultar dúvidas frequentes</button>
         </>}
         {topic === "technology" && <>
-          <div className="guide-bubble"><h3>Orientação com caminhos claros</h3><p>Este guia usa opções predefinidas para localizar informações e telas. Nenhuma pergunta é enviada a uma IA.</p><p>Na integração futura, a IA deverá usar fontes aprovadas e encaminhar dúvidas que dependam da equipe.</p></div>
+          <div className="guide-bubble"><h3>Orientação com caminhos claros</h3><p>Este guia usa opções predefinidas para localizar informações e telas. Nenhuma pergunta é enviada a uma IA.</p><p>Para testar os ambientes integrados, acesse os painéis de IA do aluno ou do professor no menu de opções.</p></div>
           <button className="button button--secondary" onClick={() => navigate("proposta")}>Ver nossa proposta</button>
+          <button className="button button--primary" onClick={() => go(() => onOpenAIPanel("student"))}>Painel de IA do aluno</button>
+          <button className="button button--secondary" onClick={() => go(() => onOpenAIPanel("teacher"))}>Painel de IA do professor</button>
         </>}
         {topic !== "start" && <button className="button button--text" onClick={() => choose("start")}>← Voltar às opções</button>}
       </div>

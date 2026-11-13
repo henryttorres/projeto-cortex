@@ -2,7 +2,7 @@
 
 Atualizado em 13/11/2026. Responsáveis: Henry e Eduardo.
 
-> **Estado vigente:** o frontend React/Vite institucional é servido em 5174; a API Express experimental funciona separadamente em 3001. `backend/src/cortexAgent.js` usa LangChain `bindTools` e disponibiliza chat, diagnóstico e registro/consulta de lacunas, mas as telas do site institucional ainda não chamam esses endpoints. `backend/.env` deve ser criado localmente com `DATABASE_URL`, `OPENAI_API_KEY` e `PORT=3001`; credenciais locais são ignoradas pelo Git. A seção histórica abaixo descreve o protótipo anterior e não deve orientar a execução atual.
+> **Estado vigente:** o frontend React/Vite institucional é servido em 5174; a API Express experimental funciona separadamente em 3001. A seção Painéis de IA e o Guia Cortéx direcionam para ambientes de aluno e professor que consomem o chat, upload de PDF, diagnóstico e lacunas de `backend/src/cortexAgent.js` e `backend/src/server.js`. Esses painéis demonstrativos não têm autenticação; não inserir dados pessoais ou sensíveis. `backend/.env` deve ser criado localmente com `DATABASE_URL`, `OPENAI_API_KEY` e `PORT=3001`; credenciais locais são ignoradas pelo Git. A seção histórica abaixo descreve o protótipo anterior e não deve orientar a execução atual.
 
 ## Estado
 Protótipo React/TypeScript/Vite em frontend, com dados fictícios em memória. Backend, autenticação real, persistência, IA e deploy público não implementados.

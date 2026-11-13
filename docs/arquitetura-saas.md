@@ -41,7 +41,7 @@ O Cortéx SaaS segue uma arquitetura **cliente-servidor desacoplada** com um pip
 
 ### 2.1 Frontend institucional (React + Vite)
 
-O frontend atual mantém o site institucional e os fluxos de navegação do protótipo. A integração descrita neste documento fica disponível como API independente; as telas do site ainda não consomem os endpoints de IA. O servidor Vite de desenvolvimento usa a porta `5174`.
+O frontend atual mantém o site institucional e os fluxos de navegação do protótipo. A seção Painéis de IA e o Guia Cortéx abrem ambientes dedicados de aluno e professor que consomem os endpoints da API descritos neste documento. Os demais fluxos institucionais continuam separados; os painéis de IA são demonstrativos e não implementam autenticação ou controle de acesso. O servidor Vite de desenvolvimento usa a porta `5174`.
 
 ### 2.2 Backend (Node.js + Express)
 

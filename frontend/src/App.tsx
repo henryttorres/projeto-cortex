@@ -1,5 +1,6 @@
 import Guide from "./Guide";
 import LearningVideo from "./LearningVideo";
+import AIPanel, { type AIPanelRole } from "./AIPanel";
 import {
   FormEvent,
   KeyboardEvent,
@@ -10,7 +11,7 @@ import {
   useState,
 } from "react";
 
-type Screen = "landing" | "signup" | "login" | "recovery" | "profiles" | "portal";
+type Screen = "landing" | "signup" | "login" | "recovery" | "profiles" | "portal" | "ai";
 type Profile = "student" | "guardian" | "teacher" | "admin" | "support";
 type StudentId = "lucas" | "bia";
 type ClassId = "2a" | "2b";
@@ -204,6 +205,7 @@ function Header({
           aria-label="Navegação principal"
         >
           <button onClick={() => go("proposta")}>Nossa proposta</button>
+          <button onClick={() => go("painel-ia")}>Painéis de IA</button>
           <button onClick={() => go("como-funciona")}>Como funciona</button>
           <button onClick={() => go("duvidas")}>Dúvidas</button>
           <button className="nav-login" onClick={onLogin}>
@@ -1128,9 +1130,11 @@ function SimpleScreen({
 function Landing({
   onSignup,
   onLogin,
+  onOpenAIPanel,
 }: {
   onSignup: () => void;
   onLogin: () => void;
+  onOpenAIPanel: (role: AIPanelRole) => void;
 }) {
   const navigate = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
@@ -1190,6 +1194,33 @@ function Landing({
                 <p>A inteligência artificial aparece como recurso de apoio à organização e à aprendizagem, sempre com intencionalidade pedagógica e acompanhamento humano. Detalhes de uso ainda serão definidos.</p>
               </div>
             </aside>
+          </div>
+        </section>
+
+        <section className="section" id="painel-ia">
+          <div className="container">
+            <div className="section-heading">
+              <span className="section-number">IA</span>
+              <div>
+                <span className="eyebrow">Ambientes de aprendizagem</span>
+                <h2>Acesse os painéis de IA</h2>
+              </div>
+            </div>
+            <p className="section-intro">Escolha seu ambiente para explorar o apoio da inteligência artificial no Cortéx.</p>
+            <div className="ai-entry-grid">
+              <article className="ai-entry-card">
+                <span className="eyebrow">Estúdio Cortéx</span>
+                <h3>Painel do aluno</h3>
+                <p>Converse com a IA e estude a partir dos materiais disponibilizados pelo professor.</p>
+                <Button onClick={() => onOpenAIPanel("student")}>Entrar como aluno</Button>
+              </article>
+              <article className="ai-entry-card">
+                <span className="eyebrow">Acervo e acompanhamento</span>
+                <h3>Painel do professor</h3>
+                <p>Envie materiais, acompanhe lacunas de aprendizagem e gere um diagnóstico da turma.</p>
+                <Button variant="secondary" onClick={() => onOpenAIPanel("teacher")}>Entrar como professor</Button>
+              </article>
+            </div>
           </div>
         </section>
 
@@ -1270,13 +1301,14 @@ function Landing({
           <p>Protótipo público — sem coleta ou envio de dados.</p>
         </div>
       </footer>
-      <Guide onNavigate={navigate} onSignup={onSignup} onLogin={onLogin} />
+      <Guide onNavigate={navigate} onSignup={onSignup} onLogin={onLogin} onOpenAIPanel={onOpenAIPanel} />
     </div>
   );
 }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("landing");
+  const [aiRole, setAiRole] = useState<AIPanelRole>("student");
   const [profile, setProfile] = useState<Profile>("student");
   const [communications, setCommunications] = useState<Communication[]>(initialCommunications);
   const [tickets, setTickets] = useState<Ticket[]>([
@@ -1295,6 +1327,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [screen]);
 
+  if (screen === "ai") return <AIPanel initialRole={aiRole} onBack={() => setScreen("landing")} />;
   if (screen === "signup") return <SignupScreen onHome={() => setScreen("landing")} />;
   if (screen === "login") return <LoginScreen onHome={() => setScreen("landing")} onRecovery={() => setScreen("recovery")} onExplore={() => setScreen("profiles")} />;
   if (screen === "recovery") return <RecoveryScreen onHome={() => setScreen("landing")} onLogin={() => setScreen("login")} />;
@@ -1312,5 +1345,9 @@ export default function App() {
       />
     );
   }
-  return <Landing onSignup={() => setScreen("signup")} onLogin={() => setScreen("login")} />;
+  return <Landing
+    onSignup={() => setScreen("signup")}
+    onLogin={() => setScreen("login")}
+    onOpenAIPanel={(role) => { setAiRole(role); setScreen("ai"); }}
+  />;
 }
