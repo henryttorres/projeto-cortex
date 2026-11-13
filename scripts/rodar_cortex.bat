@@ -26,9 +26,9 @@ if not exist "node_modules\.bin\vite.cmd" (
     exit /b 1
   )
 )
-echo Iniciando Cortex em http://127.0.0.1:5173/ . Para parar, use Ctrl+C nesta janela.
+echo Iniciando Cortex em http://127.0.0.1:5174/ . Para parar, use Ctrl+C nesta janela.
 echo Se a porta estiver ocupada, encerre a outra instancia antes de tentar novamente.
-call pnpm.cmd dev --host 127.0.0.1 --port 5173 --open
+call pnpm.cmd dev --host 127.0.0.1 --port 5174 --strictPort --open
 set "RESULT=%ERRORLEVEL%"
 popd
 exit /b %RESULT%
