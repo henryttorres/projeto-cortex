@@ -8,6 +8,8 @@ export type { User } from './api';
 import Communications from './Communications';
 import Tickets from './Tickets';
 import Operations, { Availability } from './Operations';
+import TeacherDashboard from './TeacherDashboard';
+import AiPanel from './AiPanel';
 type Student = { id: string; name: string; enrollments: { schoolClass: SchoolClass }[] };
 type SchoolClass = { id: string; name: string; period: string };
 type AgendaItem = { id: string; title: string; description: string; location: string; startsAt: string; endsAt: string };
@@ -23,7 +25,7 @@ export default function ConnectedPortal({ user, onLogout }: { user: User; onLogo
   const [notice, setNotice] = useState('');
   const [saving, setSaving] = useState(false);
   const [refresh, setRefresh] = useState(0);
-  const [section, setSection] = useState<'agenda' | 'communications' | 'support' | 'metrics' | 'service'>(user.roles.some(r => ['support', 'supervisor', 'coordinator', 'director'].includes(r)) ? 'support' : 'agenda');
+  const [section, setSection] = useState<'agenda' | 'communications' | 'support' | 'metrics' | 'service' | 'teacher-dashboard' | 'ai-panel'>(user.roles.includes('teacher') ? 'teacher-dashboard' : user.roles.some(r => ['support', 'supervisor', 'coordinator', 'director'].includes(r)) ? 'support' : 'agenda');
   const [draftActive, setDraftActive] = useState(false);
   const requestId = useRef(0);
   const canWrite = user.roles.some(r => r === 'teacher' || r === 'admin');
@@ -83,6 +85,8 @@ export default function ConnectedPortal({ user, onLogout }: { user: User; onLogo
       <nav className="connected-nav" aria-label="Serviços do portal">
         {academicAccess && <button className="button button--secondary" aria-current={section === 'agenda' ? 'page' : undefined} disabled={draftActive} onClick={() => setSection('agenda')}>Agenda</button>}
         {academicAccess && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'communications' ? 'page' : undefined} onClick={() => setSection('communications')}>Comunicados</button>}
+        {canWrite && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'teacher-dashboard' ? 'page' : undefined} onClick={() => setSection('teacher-dashboard')}>Painel docente</button>}
+        {canWrite && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'ai-panel' ? 'page' : undefined} onClick={() => setSection('ai-panel')}>Acervo e IA</button>}
         <button className="button button--secondary" disabled={draftActive} aria-current={section === 'support' ? 'page' : undefined} onClick={() => setSection('support')}>Atendimento</button>
         {user.roles.some(r => ['support', 'supervisor', 'coordinator', 'director', 'admin'].includes(r)) && <button className="button button--secondary" disabled={draftActive} aria-current={section === 'metrics' ? 'page' : undefined} onClick={() => setSection('metrics')}>Indicadores</button>}
         <button className="button button--secondary" disabled={draftActive} aria-current={section === 'service' ? 'page' : undefined} onClick={() => setSection('service')}>Secretaria e equipes</button>
@@ -91,12 +95,16 @@ export default function ConnectedPortal({ user, onLogout }: { user: User; onLogo
       {user.roles.includes('support') && <Availability onExpired={onLogout} />}
       {section === 'service' && <ServiceDesk user={user} onDraftChange={setDraftActive} onExpired={onLogout} />}
       {section === 'metrics' && <Operations onExpired={onLogout} />}
-      {['agenda', 'communications'].includes(section) && <section className="connected-card" aria-label="Contexto acadêmico">
+      {['agenda', 'communications', 'teacher-dashboard', 'ai-panel'].includes(section) && <section className="connected-card" aria-label="Contexto acadêmico">
         {contextOptions.length > 0 && <div className="field"><label htmlFor="real-context">{canWrite ? 'Turma' : 'Estudante'}</label><select id="real-context" disabled={draftActive} value={selected} onChange={event => { setSelected(event.target.value); setNotice(''); }}>{contextOptions.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}
         {context && <h3>{context.name}</h3>}
         {draftActive && <p>Conclua ou descarte o rascunho para trocar de turma ou abrir a agenda.</p>}
       </section>}
       {section === 'support' && <Tickets user={user} onSessionExpired={onLogout} onDraftChange={setDraftActive} />}
+      {section === 'teacher-dashboard' && canWrite && selected && <TeacherDashboard key={selected} classId={selected} className={context?.name || ''} onSessionExpired={onLogout} />}
+      {section === 'teacher-dashboard' && !selected && <p role="status">{loading ? 'Carregando turmas…' : error || 'Nenhuma turma disponível para esta conta.'}</p>}
+      {section === 'ai-panel' && canWrite && selected && <AiPanel key={selected} classId={selected} className={context?.name || ''} onSessionExpired={onLogout} />}
+      {section === 'ai-panel' && !selected && <p role="status">{loading ? 'Carregando turmas…' : 'Nenhuma turma disponível para esta conta.'}</p>}
       {section === 'communications' && selected && <Communications key={selected} contextId={selected} contextName={context?.name || ''} canWrite={canWrite} onSessionExpired={onLogout} onDraftChange={setDraftActive} />}
       {section === 'communications' && !selected && <p role="status">{loading ? 'Carregando vínculos…' : error || 'Nenhum vínculo acadêmico disponível para esta conta.'}</p>}
       {section === 'agenda' && <section className="connected-card" aria-labelledby="agenda-title">

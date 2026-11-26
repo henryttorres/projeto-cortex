@@ -52,7 +52,48 @@
 .metric-trend { display: grid; gap: .75rem; margin: 1rem 0 2rem; }
 .metric-trend > div { display: grid; grid-template-columns: 7rem 1fr; align-items: center; gap: .5rem; }
 .metric-bar { background: #16666b; color: white; min-width: 2rem; padding: .25rem .5rem; border-radius: 4px; }
+.teacher-dashboard { --teacher-navy: #0A192F; --teacher-cyan: #00F0FF; color: #eaf5ff; display: grid; gap: 1.25rem; }
+.teacher-dashboard__header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.teacher-dashboard__header h2 { margin: .25rem 0; }
+.teacher-dashboard .eyebrow { color: var(--teacher-cyan); }
+.teacher-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.teacher-metrics article, .teacher-card { background: var(--teacher-navy); border: 1px solid #17405b; border-radius: 14px; padding: 1.25rem; }
+.teacher-metrics article { border-top: 3px solid var(--teacher-cyan); }
+.teacher-metrics span { display: block; color: #c4d6e5; }
+.teacher-metrics strong { display: block; color: var(--teacher-cyan); font-size: 2rem; margin-top: .5rem; }
+.teacher-card h3 { margin-top: 0; }
+.teacher-card .field label, .teacher-card .teacher-review label { color: #eaf5ff; }
+.teacher-card input, .teacher-card select, .teacher-card textarea { background: #f7fbff; color: #102b3f; }
+.teacher-form { display: grid; gap: .75rem; margin: 1rem 0; }
+.teacher-form--inline { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.teacher-card .teacher-note { color: #c4d6e5; }
+.teacher-card a { color: var(--teacher-cyan); }
+.teacher-question-list, .teacher-drafts { display: grid; gap: 1rem; margin-top: 1.25rem; }
+.teacher-question-list article, .teacher-drafts article { background: #102640; border: 1px solid #24445e; border-radius: 10px; padding: 1rem; overflow-wrap: anywhere; }
+.teacher-question { white-space: pre-wrap; }
+.teacher-reply { border-left: 3px solid var(--teacher-cyan); padding-left: 1rem; }
+.teacher-review { display: grid; gap: 1rem; margin-top: 1rem; }
+.teacher-review label { display: flex; align-items: flex-start; gap: .6rem; }
+.teacher-review input { margin-top: .25rem; }
+.ai-panel { --ai-navy: #0A192F; --ai-cyan: #00F0FF; color: #eaf5ff; display: grid; gap: 1.25rem; }
+.ai-panel__header { display: flex; justify-content: space-between; align-items: end; gap: 1rem; flex-wrap: wrap; }
+.ai-panel__header h2 { margin: .25rem 0; }
+.ai-panel .eyebrow { color: var(--ai-cyan); }
+.ai-card { background: var(--ai-navy); border: 1px solid #17405b; border-radius: 14px; padding: clamp(1rem, 3vw, 1.5rem); overflow-wrap: anywhere; }
+.ai-card h3 { margin-top: 0; }
+.ai-card .field label { color: #eaf5ff; }
+.ai-card input, .ai-card select, .ai-card textarea, .ai-panel__header select { background: #f7fbff; color: #102b3f; }
+.ai-form { display: grid; gap: .75rem; margin: 1rem 0; }
+.ai-form--inline { grid-template-columns: minmax(12rem, .7fr) minmax(0, 2fr) auto; align-items: end; }
+.ai-card__heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.ai-panel__note { color: #c4d6e5; }
+.ai-gap-list { display: grid; gap: .75rem; }
+.ai-gap-list article, .ai-diagnosis, .ai-answer { background: #102640; border: 1px solid #24445e; border-radius: 10px; padding: 1rem; }
+.ai-answer p, .ai-gap-list article p:last-child { white-space: pre-wrap; }
+.ai-answer code { display: inline-block; margin: .25rem; overflow-wrap: anywhere; }
 @media(max-width: 700px) { .metrics-grid { grid-template-columns: 1fr; } }
+@media(max-width: 700px) { .teacher-metrics { grid-template-columns: 1fr; } .teacher-form--inline { grid-template-columns: 1fr; } }
+@media(max-width: 850px) { .ai-form--inline { grid-template-columns: 1fr; } }
 @media(max-width: 600px) { .connected-dates { grid-template-columns: 1fr; } .connected-main { padding-top: 1.5rem; } }
 
 .service-teams { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
