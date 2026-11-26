@@ -1,11 +1,9 @@
 # Agente Cortéx (ADK)
 
-Ambiente local isolado para desenvolver o agente Python com Google ADK. O `root_agent` encaminha dúvidas de aprendizagem ao `tutor_socratico`, que conduz o aluno pelas etapas Definir, Selecionar, Criar, Conferir e Aplicar.
-O protótipo usa o modelo `gemini-3.8-flash`, conforme configurado no agente.
-
-Esta primeira versão não consulta o acervo de professores nem registra lacunas. O tutor solicita material ao aluno quando necessário e não inventa citações; as integrações serão adicionadas em etapas posteriores.
-
-O teste live dos cenários do agente ainda não foi validado: a API Gemini retornou erros 503 e 429. Portanto, não há confirmação de execução bem-sucedida desses cenários. O roadmap aprovado — incluindo painel integrado, RAG sem dependência inicial de pgvector e ponte via NestJS — está descrito no [README principal](../README.md#ia-estado-e-próximos-passos); essas funcionalidades ainda não existem.
+Agente modular Python com Google ADK. O `root_agent` direciona consultas para
+subagentes de acervo, lacunas, diagnóstico, plano de aula e tutoria socrática.
+Respostas sobre o acervo usam trechos indexados no NestJS e devem citar seus
+identificadores; os planos permanecem sugestões para revisão humana.
 
 ## Preparar o ambiente no Windows
 
@@ -17,7 +15,11 @@ ai-agent\.venv\Scripts\python.exe -m pip install -r ai-agent\requirements.txt
 Copy-Item ai-agent\cortex_agent\.env.example ai-agent\cortex_agent\.env
 ```
 
-Edite `ai-agent\cortex_agent\.env` e preencha `GOOGLE_API_KEY` com uma chave criada no Google AI Studio. O arquivo `.env` e ignorado pelo Git; não compartilhe nem faça commit da chave.
+Edite `ai-agent\cortex_agent\.env` e preencha `GOOGLE_API_KEY` com uma chave criada no Google AI Studio. Configure também `CORTEX_BACKEND_URL` e `CORTEX_INTERNAL_TOKEN`; o token deve ser igual ao configurado em `backend\.env`. O arquivo `.env` é ignorado pelo Git; não compartilhe nem faça commit de chaves ou tokens.
+
+No backend, copie `backend\.env.example` para `backend\.env` e configure o mesmo
+`CORTEX_INTERNAL_TOKEN`. O NestJS deve estar disponível em `http://127.0.0.1:3001`
+e o serviço ADK na porta 8000.
 
 ## Executar
 
@@ -35,4 +37,10 @@ Set-Location ai-agent
 .\.venv\Scripts\adk.exe web --port 8000
 ```
 
-Acesse `http://localhost:8000` e selecione `cortex_agent`. Rode o comando `web` a partir de `ai-agent`, que e a pasta que contem o agente.
+Acesse `http://localhost:8000` e selecione `cortex_agent`. Rode o comando `web`
+a partir de `ai-agent`, que é a pasta que contém o agente. A rota de assistência
+do portal usa a API de execução ADK (`/run`) e cria sessões temporárias por pedido.
+
+O acervo local armazena texto e `embeddingJson` como JSON para busca lexical. Não
+é necessário instalar `pgvector`; embeddings vetoriais e índices HNSW ficam para
+uma etapa futura.
