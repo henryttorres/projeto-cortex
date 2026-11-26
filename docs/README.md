@@ -1,14 +1,15 @@
 # Documentação do Cortéx
 
-Atualização: 11/10/2026. Implementação ampliada com equipes e secretaria nesta entrega.
+Atualização: 26/11/2026. O panorama do desenvolvimento distingue o estado validado em `main` do trabalho ainda em `dev`.
 
 ## Ordem de leitura
 
 1. [README principal](../README.md): estado do produto.
 2. [Plano de 90 dias](plano-90-dias.md): entregas e responsabilidades propostas.
-3. [Entidades e permissões](equipes-entidades-permissoes.md): próximo marco, separado do que existe.
-4. [Estrutura](estrutura-do-projeto.md) e [VS Code](../COMECE-AQUI.md).
-5. [Fluxo Git](fluxo-git.md): validação e promoção.
+3. [Panorama do desenvolvimento](../README.md#panorama-de-desenvolvimento): estado de `main`, andamento em `dev` e próximos passos.
+4. [Entidades e permissões](equipes-entidades-permissoes.md): modelo vigente e evolução.
+5. [Estrutura](estrutura-do-projeto.md) e [VS Code](../COMECE-AQUI.md).
+6. [Fluxo Git](fluxo-git.md): desenvolvimento em `dev`, validação em `prod` e promoção para `main`.
 
 ## Evidências
 

@@ -1,14 +1,14 @@
-# Fluxo Git: prod → main
+# Fluxo Git: dev → prod → main
 
-Decisão de Henry em 11/10/2026: **prod recebe integração inicial; main recebe entregas validadas**. O nome prod representa a etapa de validação neste projeto; não indica deploy público automático.
+Decisão de Henry em 26/11/2026: **dev é a branch de desenvolvimento; prod recebe as entregas para validação; main recebe somente o que foi validado**. O nome `prod` representa a etapa de validação neste projeto; não indica deploy público automático.
 
-1. Conferir pasta, `git status -sb` e `git fetch origin`; preservar alterações/stashes.
-2. Trabalhar em prod ou integrar nela branches de trabalho sem reescrever histórico. Commits em português e arquivos explicitamente selecionados.
-3. Publicar origin/prod após conferir divergência; nunca force push.
-4. Documentação: conferir links/consistência. Código: build/testes pertinentes. Comportamento: fluxos/autorização. Banco: migração/integridade. Registrar commit testado e limitações.
-5. Revisar prod → main com evidências antes da promoção. Não declarar requisito planejado como implementado.
+1. Conferir pasta, branch, `git status -sb` e `git fetch origin`; preservar alterações locais.
+2. Desenvolver e fazer commits em `dev`, selecionando explicitamente os arquivos necessários. Não incluir segredos, `.env`, dados locais ou arquivos temporários.
+3. Publicar `origin/dev` após conferir a divergência; nunca force push. Abrir PR **`dev` → `prod`** para revisão e integração. Não abrir PR direto de `dev` para `main`.
+4. Integrar em `prod` sem reescrever histórico. Validar documentação, build/testes pertinentes, fluxos, autorização e migrações conforme o escopo. Registrar o commit validado e as limitações.
+5. Somente depois de aprovada a validação em `prod`, abrir PR **`prod` → `main`**. Revisar e promover; `main` recebe apenas o estado validado. Não declarar requisito planejado como implementado.
 6. Sincronizar outras cópias somente após revisar mudanças locais.
 
-Não foram configurados rulesets/checks obrigatórios remotos nesta organização. O fluxo é convenção documentada; não há pipeline de deploy público.
+**Exceção documental:** somente o panorama de status do README principal pode ser atualizado diretamente em `main`, com data e separação explícita entre estado validado e trabalho em andamento. Isso não promove código ou funcionalidades. Sincronize essa atualização documental com `dev` no próximo ciclo para evitar divergência.
 
-Na conferência, origin/main e origin/prod estavam cinco commits atrás de 03b15d5. A integração em prod preserva hashes por avanço direto. A antiga branch de trabalho não precisa ser apagada. main permanece separada para a promoção validada.
+Não foram configurados rulesets/checks obrigatórios remotos nesta organização. O fluxo é convenção documentada; não há pipeline de deploy público. `dev`, `prod` e `main` não avançam automaticamente juntos. Antes da promoção, confirme que `prod` contém o estado de `dev` que foi testado; nunca pule `prod`.
