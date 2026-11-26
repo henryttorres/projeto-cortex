@@ -12,11 +12,17 @@ import { AccessService } from './access.service';
 import { CommunicationsController } from './communications';
 import { TicketsController } from './tickets';
 import { OperationsController } from './operations';
+import { SubjectsController } from './subjects';
+import { QuestionsController } from './questions';
+import { LessonDraftsController } from './lesson-drafts';
+import { RagIngestController } from './rag-ingest';
+import { LearningGapsController } from './learning-gaps';
+import { AiBridgeController, AiInternalController, AiInternalGuard } from './ai-bridge';
 
 @Module({
   imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }])],
-  controllers: [AuthController, SchoolController, CommunicationsController, TicketsController, OperationsController, TeamsController, ServiceController],
-  providers: [PrismaService, SessionGuard, AccessService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  controllers: [AuthController, SchoolController, CommunicationsController, TicketsController, OperationsController, TeamsController, ServiceController, SubjectsController, QuestionsController, LessonDraftsController, RagIngestController, LearningGapsController, AiBridgeController, AiInternalController],
+  providers: [PrismaService, SessionGuard, AccessService, AiInternalGuard, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 class AppModule {}
 

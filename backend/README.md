@@ -1,7 +1,7 @@
-# API Cortéx — acesso, agenda, comunicados e atendimento
+# API Cortéx — portal, docência, acervo e atendimento
 
-Primeira integração funcional: NestJS/TypeScript, Prisma e PostgreSQL. Dados de
-demonstração são fictícios. Não é implantação de produção.
+Integração NestJS/TypeScript, Prisma e PostgreSQL. Dados de demonstração são
+fictícios. Não é implantação de produção.
 
 ## Preparar em uma máquina nova
 
@@ -72,6 +72,18 @@ integrada; a tela antiga permanece explicitamente simulada.
 | POST | /tickets | Solicitante vem da sessão; abertura idempotente |
 | GET | /tickets/:id | Autorização por objeto; histórico paginado |
 | POST | /tickets/:id/actions | Assumir, responder, encerrar ou reabrir conforme perfil, atribuição e versão |
+| GET | /classes/:id/subjects | Docente vinculado ou administração |
+| POST | /classes/:id/subjects | Criar disciplina na turma; link NotebookLM opcional |
+| PATCH / DELETE | /subjects/:id | Docente vinculado ou administração |
+| GET | /classes/:id/questions | Feed e contadores docentes |
+| POST | /classes/:id/questions | Estudante autenticado e matriculado |
+| POST | /classes/:id/questions/:questionId/replies | Resposta do docente da turma |
+| GET / POST | /classes/:id/lesson-drafts | Consultar ou criar planos como rascunho |
+| POST | /classes/:id/lesson-drafts/:draftId/publish | Docente/admin; confirmação de revisão e auditoria `reviewedBy` |
+| GET / POST | /classes/:id/rag-chunks | Buscar ou indexar texto por disciplina |
+| GET / POST | /classes/:id/learning-gaps | Docentes consultam; estudante matriculado ou docente registra |
+| GET / POST | /classes/:id/diagnosis | Consultar ou gerar diagnóstico agregado |
+| POST | /ai/assist | Ponte autenticada do docente para o ADK |
 
 Corpo da criação: `title`, `description`, `location`, `startsAt` e `endsAt` em ISO
 8601. O servidor e o banco exigem término posterior ao início. Campos extras são
@@ -97,9 +109,29 @@ sessões expiradas, estratégia de rate limit distribuído se houver múltiplas
 instâncias, política de dados, backups e observabilidade. O rate limit atual é
 local à instância. Não há isolamento multiescola implementado.
 
-Interesse e administração completa permanecem no portal
-de demonstração separado. Não misturar dados simulados com o portal autenticado.
-O assistente ainda é guiado por botões, sem LLM.
+## Docência, acervo e IA
+
+As migrations `202611260001_subjects`, `202611260002_teacher_qa` e
+`202611260003_rag` acrescentam disciplinas, Q&A, planos, trechos, lacunas e
+diagnósticos. Execute `npm run db:migrate` depois de configurar `DATABASE_URL`;
+`npm run db:generate` atualiza o cliente Prisma.
+
+O ingest aceita texto colado ou arquivos de texto lidos pelo navegador (`.txt` e
+`.md`, até 16.000 caracteres) e cria trechos sobrepostos vinculados a turma e
+disciplina. O campo `embeddingJson` é JSONB opcional; a busca local é lexical e
+não requer `pgvector` nem índice HNSW. NotebookLM permanece link externo, sem
+indexação automática.
+
+A ponte `/api/ai/assist` exige sessão de docente/admin e docência na turma. O
+NestJS encaminha o pedido ao ADK local em `CORTEX_ADK_URL` e injeta o contexto
+verificado; ferramentas Python consultam rotas internas autenticadas por
+`CORTEX_INTERNAL_TOKEN`, que deve ser igual no backend e em
+`ai-agent/cortex_agent/.env`. Configure também `GOOGLE_API_KEY` para chamadas
+live. Não exponha o token no frontend nem no Git. A execução live com Gemini e
+as migrations não foram aplicadas/validadas nesta rodada.
+
+Interesse e administração completa permanecem no portal de demonstração
+separado. Não misturar dados simulados com o portal autenticado.
 
 ## Verificações
 

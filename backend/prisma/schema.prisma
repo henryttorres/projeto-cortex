@@ -15,6 +15,15 @@ enum Role {
   coordinator
   director
 }
+enum LessonDraftStatus {
+  draft
+  published
+}
+enum LearningGapKind {
+  duvida_recorrente
+  tentativa_cola
+  erro_conceitual
+}
 model Account {
   id String @id @default(uuid()) @db.Uuid
   email String @unique
@@ -33,6 +42,12 @@ model Account {
   memberships TeamMember[]
   supportReadyUntil DateTime?
   resolvedCycles TicketCycle[]
+  questionAsks TeacherQuestion[] @relation("QuestionAsker")
+  questionReplies TeacherQuestionReply[]
+  lessonDrafts LessonDraft[] @relation("LessonDraftAuthor")
+  reviewedLessonDrafts LessonDraft[] @relation("LessonDraftReviewer")
+  reportedLearningGaps LearningGap[] @relation("LearningGapReporter")
+  generatedDiagnoses ClassDiagnosis[]
   createdAt DateTime @default(now())
 }
 model AccountRole {
@@ -48,6 +63,8 @@ model Student {
   account Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
   guardians GuardianLink[]
   enrollments Enrollment[]
+  questions TeacherQuestion[]
+  learningGaps LearningGap[]
 }
 model GuardianLink {
   accountId String @db.Uuid
@@ -66,6 +83,12 @@ model SchoolClass {
   teachings Teaching[]
   events AgendaEvent[]
   communications CommunicationClass[]
+  subjects Subject[]
+  questions TeacherQuestion[]
+  lessonDrafts LessonDraft[]
+  ragChunks RagDocumentChunk[]
+  learningGaps LearningGap[]
+  diagnoses ClassDiagnosis[]
   @@unique([name, period])
 }
 model Enrollment {
@@ -84,6 +107,116 @@ model Teaching {
   schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
   @@id([accountId, classId])
   @@index([classId])
+}
+model Subject {
+  id String @id @default(uuid()) @db.Uuid
+  classId String @db.Uuid
+  name String @db.VarChar(120)
+  notebookLmUrl String? @db.VarChar(2048)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  questions TeacherQuestion[]
+  lessonDrafts LessonDraft[]
+  ragChunks RagDocumentChunk[]
+  learningGaps LearningGap[]
+  diagnoses ClassDiagnosis[]
+  @@unique([classId, name])
+}
+model TeacherQuestion {
+  id String @id @default(uuid()) @db.Uuid
+  classId String @db.Uuid
+  subjectId String? @db.Uuid
+  askerId String @db.Uuid
+  studentId String @db.Uuid
+  question String @db.VarChar(3000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  asker Account @relation("QuestionAsker", fields: [askerId], references: [id], onDelete: Restrict)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reply TeacherQuestionReply?
+  @@index([classId, createdAt, id])
+  @@index([subjectId, createdAt])
+}
+model TeacherQuestionReply {
+  id String @id @default(uuid()) @db.Uuid
+  questionId String @unique @db.Uuid
+  authorId String @db.Uuid
+  answer String @db.VarChar(5000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  question TeacherQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  author Account @relation(fields: [authorId], references: [id], onDelete: Restrict)
+}
+model LessonDraft {
+  id String @id @default(uuid()) @db.Uuid
+  classId String @db.Uuid
+  subjectId String? @db.Uuid
+  authorId String @db.Uuid
+  title String @db.VarChar(160)
+  objectives String @db.VarChar(5000)
+  materials String @db.VarChar(5000)
+  activities String @db.VarChar(10000)
+  assessment String @db.VarChar(5000)
+  status LessonDraftStatus @default(draft)
+  reviewedBy String? @db.Uuid
+  reviewedAt DateTime? @db.Timestamptz(3)
+  publishedAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  author Account @relation("LessonDraftAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  reviewer Account? @relation("LessonDraftReviewer", fields: [reviewedBy], references: [id], onDelete: Restrict)
+  @@index([classId, status, createdAt])
+  @@index([subjectId])
+}
+model RagDocumentChunk {
+  id String @id @default(uuid()) @db.Uuid
+  classId String @db.Uuid
+  subjectId String @db.Uuid
+  title String @db.VarChar(160)
+  sourceName String @db.VarChar(255)
+  chunkIndex Int
+  content String @db.Text
+  embeddingJson Json? @db.JsonB
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  @@index([classId, subjectId, createdAt])
+  @@index([subjectId, chunkIndex])
+}
+model LearningGap {
+  id String @id @default(uuid()) @db.Uuid
+  classId String @db.Uuid
+  subjectId String? @db.Uuid
+  studentId String? @db.Uuid
+  reportedById String @db.Uuid
+  kind LearningGapKind
+  description String @db.VarChar(3000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  student Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  reportedBy Account @relation("LearningGapReporter", fields: [reportedById], references: [id], onDelete: Restrict)
+  @@index([classId, subjectId, kind, createdAt])
+  @@index([studentId, createdAt])
+}
+model ClassDiagnosis {
+  id String @id @default(uuid()) @db.Uuid
+  classId String @db.Uuid
+  subjectId String? @db.Uuid
+  generatedById String @db.Uuid
+  totalGaps Int
+  summary String @db.VarChar(5000)
+  recommendations String @db.VarChar(5000)
+  indicators Json @db.JsonB
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  generatedBy Account @relation(fields: [generatedById], references: [id], onDelete: Restrict)
+  @@index([classId, createdAt])
+  @@index([subjectId])
 }
 model AgendaEvent {
   id String @id @default(uuid()) @db.Uuid

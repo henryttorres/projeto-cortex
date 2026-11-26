@@ -47,18 +47,35 @@ Em `backend`: `npm run build`, `npm test`, `npm run test:support`, `npm run test
 
 Esta entrega passou em 33 testes HTTP/operação/hierarquia e quatro suítes de interface. Consulte o relatório para cobertura e limitações. Novos comandos: `npm run test:teams` e `npm run test:teams:ui` em backend.
 
-A IA integrada ao portal, recuperação de senha, captação persistida e deploy permanecem pendentes. O guia interativo não é IA integrada. O [README anterior](docs/readme-historico-2026-10-11.md) foi preservado como registro histórico; o schema Prisma prevalece sobre modelos antigos.
+IA integrada ao portal implementada nas Ondas A–H. Antes de usar, aplique as
+migrations e configure os segredos locais do ADK/NestJS; a execução live com
+Gemini ainda não foi validada nesta rodada. Recuperação de senha, captação
+persistida adicional e deploy público permanecem pendentes. O [README anterior](docs/readme-historico-2026-10-11.md) foi preservado como registro histórico.
 
-## IA: estado e próximos passos
+## IA e ferramentas docentes
 
-**Implementado:** existe uma base local com Google ADK. O `root_agent` encaminha dúvidas acadêmicas ao `tutor_socratico`, que conduz o estudante pelas etapas do Método Cortéx e evita entregar respostas prontas. Ainda não consulta materiais dos professores, não registra lacunas e não possui RAG. O teste live dos cenários do agente não foi validado: a API Gemini retornou erros 503 e 429.
+**Implementado:** disciplinas e referências externas NotebookLM; feed e respostas
+docentes; planos de aula que permanecem rascunhos até a revisão/publicação
+explícita; acervo de trechos por disciplina; registro de `duvida_recorrente`,
+`tentativa_cola` e `erro_conceitual`; diagnóstico persistido da turma; subagentes
+Google ADK e aba **Acervo e IA** conectada ao portal. As respostas recebem
+contexto autorizado de turma/disciplina e apresentam IDs de trechos recuperados.
 
-O painel de IA disponível hoje é a interface de desenvolvimento do ADK, não um painel integrado ao portal. O menu local pode iniciar ou parar site, API e painel, mostrar o estado dos serviços e abrir as interfaces; ao parar, preserva o PostgreSQL e os dados. Consulte o [guia do agente](ai-agent/README.md) e a seção de [execução local](#execução).
+A ingestão local aceita texto colado e arquivos `.txt`/`.md` de até 64 KB
+(16.000 caracteres). A busca atual é lexical sobre texto; `embeddingJson` fica
+preparado sem exigir `pgvector` ou HNSW. O link NotebookLM é somente uma referência
+externa e não é importado/indexado automaticamente. Planos gerados continuam
+sugestões para revisão docente.
 
-**Planejado para desenvolvimento posterior — não implementado:**
+Para habilitar localmente, aplique `npm run db:migrate` em `backend` e configure
+`CORTEX_INTERNAL_TOKEN` com o mesmo segredo em `backend/.env` e
+`ai-agent/cortex_agent/.env`; configure `GOOGLE_API_KEY` no ambiente do ADK.
+O menu `scripts\\menu_cortex.bat` mantém a inicialização do ADK em
+`http://127.0.0.1:8000`; o NestJS faz a ponte servidor-a-servidor e o navegador
+não acessa o ADK diretamente. Detalhes e rotas estão no
+[guia do backend](backend/README.md) e [guia do agente](ai-agent/README.md).
 
-1. **Etapa A — ferramentas docentes:** adicionar `Subject` vinculado a uma turma, perguntas docentes e rascunhos de planos de aula. Incluir `notebookLmUrl` opcional como referência; a ingestão de conteúdo do NotebookLM continua pausada. Publicar um plano exigirá revisão humana registrada por usuário autorizado.
-2. **Etapa B — painel e integração de IA:** criar o painel do portal, ferramentas/subagentes ADK e uma ponte NestJS–ADK. O navegador não chamará o ADK diretamente; a comunicação entre serviços usará segredo interno guardado apenas no ambiente local, nunca no Git.
-3. **RAG inicial:** armazenar conteúdo em `RagDocumentChunk` com `content` e `embeddingJson`. Nesta primeira etapa, não exigir a extensão pgvector nem índice HNSW; busca vetorial pode ser habilitada depois.
-
-Ao retomar o trabalho no Antigravity, reconciliar primeiro o plano com o schema Prisma e as permissões atuais; implementar e validar a Etapa A antes da Etapa B. O protótipo antigo de IA/RAG em outra branch serve apenas como referência, não como implementação vigente. Os itens acima são decisões de planejamento, não funcionalidades disponíveis hoje.
+**Ainda pendente:** validação live com credenciais reais, ingestão nativa de PDF
+ou NotebookLM, embeddings e busca vetorial/pgvector-HNSW, recuperação de senha e
+deploy público. O protótipo antigo de IA/RAG em outra branch continua sendo
+apenas referência histórica.
