@@ -20,7 +20,7 @@ Pendente: metas/feriados editáveis, SLA de todo o backlog, convites de funcion�
 | [Backend](backend/README.md) | Preparo, migrações, contas e endpoints |
 | [Entidades e permissões](docs/equipes-entidades-permissoes.md) | Modelo atual e evolução de equipes |
 | [Plano de 90 dias](docs/plano-90-dias.md) | Marcos, responsáveis propostos e indicadores |
-| [Fluxo Git](docs/fluxo-git.md) | prod → validação → main |
+| [Fluxo Git](docs/fluxo-git.md) | dev → prod (validação) → main |
 | [Estrutura](docs/estrutura-do-projeto.md) | Onde editar |
 | [Identidade visual](docs/marca/direcao-visual.md) | Marca e tipografia |
 | [Operação](docs/operacao-metricas-2026-10-11.md) | Métricas e evidências anteriores |

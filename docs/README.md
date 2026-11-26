@@ -10,7 +10,7 @@ Atualização: 26/11/2026. Inclui o estado e o planejamento da base de IA; as et
 4. [Guia do agente ADK](../ai-agent/README.md): preparo, execução e limitações conhecidas.
 5. [Entidades e permissões](equipes-entidades-permissoes.md): modelo vigente e evolução.
 6. [Estrutura](estrutura-do-projeto.md) e [VS Code](../COMECE-AQUI.md).
-7. [Fluxo Git](fluxo-git.md): validação e promoção.
+7. [Fluxo Git](fluxo-git.md): desenvolvimento em `dev`, validação em `prod` e promoção para `main`.
 
 ## Evidências
 
