@@ -1,14 +1,16 @@
 # Documentação do Cortéx
 
-Atualização: 11/10/2026. Implementação ampliada com equipes e secretaria nesta entrega.
+Atualização: 26/11/2026. Inclui o estado e o planejamento da base de IA; as etapas futuras ainda não foram implementadas.
 
 ## Ordem de leitura
 
 1. [README principal](../README.md): estado do produto.
 2. [Plano de 90 dias](plano-90-dias.md): entregas e responsabilidades propostas.
-3. [Entidades e permissões](equipes-entidades-permissoes.md): próximo marco, separado do que existe.
-4. [Estrutura](estrutura-do-projeto.md) e [VS Code](../COMECE-AQUI.md).
-5. [Fluxo Git](fluxo-git.md): validação e promoção.
+3. [Estado e próximos passos da IA](../README.md#ia-estado-e-próximos-passos): separar o protótipo atual do roadmap aprovado.
+4. [Guia do agente ADK](../ai-agent/README.md): preparo, execução e limitações conhecidas.
+5. [Entidades e permissões](equipes-entidades-permissoes.md): modelo vigente e evolução.
+6. [Estrutura](estrutura-do-projeto.md) e [VS Code](../COMECE-AQUI.md).
+7. [Fluxo Git](fluxo-git.md): validação e promoção.
 
 ## Evidências
 

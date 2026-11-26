@@ -5,6 +5,8 @@ O protótipo usa o modelo `gemini-3.8-flash`, conforme configurado no agente.
 
 Esta primeira versão não consulta o acervo de professores nem registra lacunas. O tutor solicita material ao aluno quando necessário e não inventa citações; as integrações serão adicionadas em etapas posteriores.
 
+O teste live dos cenários do agente ainda não foi validado: a API Gemini retornou erros 503 e 429. Portanto, não há confirmação de execução bem-sucedida desses cenários. O roadmap aprovado — incluindo painel integrado, RAG sem dependência inicial de pgvector e ponte via NestJS — está descrito no [README principal](../README.md#ia-estado-e-próximos-passos); essas funcionalidades ainda não existem.
+
 ## Preparar o ambiente no Windows
 
 Na raiz do repositório, execute:
