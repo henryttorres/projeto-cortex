@@ -4,8 +4,8 @@ Abra **Cortex.code-workspace** por Arquivo → Abrir Workspace do Arquivo. O tí
 
 1. Confira `git status -sb`: integração em **prod**. Preserve mudanças/stashes.
 2. Máquina nova: [preparo da API](backend/README.md) e `pnpm --dir frontend install --frozen-lockfile`.
-3. Ambiente preparado: tarefa **Cortéx: Iniciar integração local**. Inicia banco portátil existente/API/Vite; recusa portas ocupadas.
-4. Abra http://127.0.0.1:5173. Acessos fictícios em .local-data/ACESSOS.md (privado).
+3. Ambiente preparado: execute `scripts\menu_cortex.bat`; escolha 1, 2 ou 3 para iniciar e abrir automaticamente site/API, painel de IA ou tudo junto no navegador padrão. Serviços Cortéx já ativos são reconhecidos; portas de outros processos não são reutilizadas. A opção 6 mostra o status; a opção 7 para somente serviços Cortéx reconhecidos, mantendo o PostgreSQL e os dados. Salve operações em andamento antes de parar.
+4. Abra http://127.0.0.1:5173. Painel de IA: http://127.0.0.1:8000. Acessos fictícios em .local-data/ACESSOS.md (privado).
 5. Edite conforme [estrutura](docs/estrutura-do-projeto.md). Landing em App.tsx; portal integrado em ConnectedPortal.tsx e módulos.
 6. Execute builds/testes pertinentes. Reinicie API após recompilar; Vite atualiza frontend.
 

@@ -29,13 +29,15 @@ Pendente: metas/feriados editáveis, SLA de todo o backlog, convites de funcion�
 
 Abra [Cortex.code-workspace](Cortex.code-workspace). Em máquina nova, siga o [preparo da API](backend/README.md) e execute `pnpm --dir frontend install --frozen-lockfile`.
 
-No Windows já preparado, pela raiz:
+No Windows já preparado, use `scripts\menu_cortex.bat`: escolha iniciar site/API, painel de IA ou tudo junto e o menu abrirá as interfaces no navegador padrão do Windows. O painel de IA requer o ambiente preparado e `GOOGLE_API_KEY` configurada em `ai-agent\cortex_agent\.env`; consulte [guia do agente](ai-agent/README.md). O menu também mostra o estado das portas e permite encerrar os serviços reconhecidos.
+
+Para iniciar somente o site integrado e API pela raiz:
 
 ```powershell
 .\scripts\iniciar-integracao.ps1
 ```
 
-Acesse http://127.0.0.1:5173. Vite encaminha `/api` para a porta 3001. Banco local preparado: 54329. O script recusa portas ocupadas. Live Server não substitui a API/Vite nos fluxos integrados.
+Acesse http://127.0.0.1:5173; Vite encaminha `/api` para a porta 3001. O painel de IA fica em http://127.0.0.1:8000. Banco local preparado: 54329. O menu reconhece serviços Cortéx já ativos e não cria instâncias duplicadas; portas de processos não reconhecidos não são reutilizadas nem encerradas. A opção de parada encerra apenas serviços identificados; o PostgreSQL e os dados permanecem. Operações em andamento podem ser interrompidas. Live Server não substitui a API/Vite nos fluxos integrados.
 
 Credenciais fictícias somente em `.local-data/ACESSOS.md`. Não publicar `.env`, tokens, senhas ou dados reais.
 
