@@ -11,6 +11,7 @@ import { searchRagChunks } from './rag-ingest';
 export class AiAssistDto {
   @IsUUID('4') classId!: string;
   @IsUUID('4') subjectId!: string;
+  @IsOptional() @IsUUID('4') studentId?: string;
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   @IsString() @MinLength(3) @MaxLength(4000) message!: string;
 }
@@ -20,6 +21,11 @@ export class AiInternalContextDto {
   @IsUUID('4') subjectId!: string;
   @IsOptional() @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   @IsString() @MaxLength(1000) query?: string;
+}
+
+export class AiInternalStudentContextDto {
+  @IsUUID('4') userId!: string;
+  @IsUUID('4') subjectId!: string;
 }
 
 @Injectable()
@@ -64,6 +70,16 @@ export class AiBridgeController {
       select: { id: true, name: true },
     });
     if (!subject) throw new ForbiddenException('A disciplina não pertence à turma selecionada.');
+    if (dto.studentId) {
+      const student = await this.db.student.findFirst({
+        where: {
+          id: dto.studentId,
+          enrollments: { some: { classId: dto.classId, active: true } },
+        },
+        select: { id: true },
+      });
+      if (!student) throw new ForbiddenException('O estudante não pertence à turma selecionada.');
+    }
     if (!process.env.CORTEX_INTERNAL_TOKEN) {
       throw new ServiceUnavailableException('Configure CORTEX_INTERNAL_TOKEN no NestJS e no agente ADK para habilitar o assistente.');
     }
@@ -122,6 +138,7 @@ export class AiBridgeController {
           cortex_class_id: dto.classId,
           cortex_subject_id: dto.subjectId,
           cortex_query: dto.message,
+          ...(dto.studentId ? { cortex_student_id: dto.studentId } : {}),
         },
       }),
     });
@@ -216,5 +233,56 @@ export class AiInternalController {
       select: { summary: true, recommendations: true, indicators: true, createdAt: true },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
+  }
+
+  @Get('classes/:classId/students/:studentId/context')
+  async studentContext(
+    @Param('classId', ParseUUIDPipe) classId: string,
+    @Param('studentId', ParseUUIDPipe) studentId: string,
+    @Query() query: AiInternalStudentContextDto,
+  ) {
+    await this.authorizeContext(classId, query);
+    const [student, subject] = await Promise.all([
+      this.db.student.findFirst({
+        where: {
+          id: studentId,
+          enrollments: { some: { classId, active: true } },
+        },
+        select: {
+          enrollments: {
+            where: { classId, active: true },
+            select: { schoolClass: { select: { name: true, period: true } } },
+          },
+        },
+      }),
+      this.db.subject.findFirst({
+        where: { id: query.subjectId, classId },
+        select: { name: true },
+      }),
+    ]);
+    if (!student || !subject) {
+      throw new ForbiddenException('O estudante ou a disciplina não pertencem ao contexto autorizado.');
+    }
+
+    const enrollment = student.enrollments[0];
+    if (!enrollment) {
+      throw new ForbiddenException('O estudante não possui matrícula ativa nesta turma.');
+    }
+
+    const learningGaps = await this.db.learningGap.findMany({
+      where: { studentId, classId, subjectId: query.subjectId },
+      select: { kind: true, description: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+      take: 12,
+    });
+
+    return {
+      studentProfile: {
+        className: enrollment.schoolClass.name,
+        period: enrollment.schoolClass.period,
+        subjectName: subject.name,
+      },
+      learningGaps,
+    };
   }
 }

@@ -5,10 +5,12 @@ import { PrismaClient } from '@prisma/client';
 import { createApp } from '../dist/app.js';
 import { digest, hashPassword } from '../dist/password.js';
 import { randomBytes, randomUUID } from 'node:crypto';
+import { firstValueFrom, take } from 'rxjs';
+import { OfficeTelemetryService } from '../dist/office-telemetry.js';
 
 const db = new PrismaClient();
 const origin = process.env.WEB_ORIGIN;
-let app, server, ana, lucas, marina, suporte, csrfAna, csrfMarina, classA, classB, hidden, created;
+let app, server, ana, lucas, marina, suporte, csrfAna, csrfMarina, classA, classB, hidden, created, createdOfficeSeedRun;
 const lucasId = '10000000-0000-4000-8000-000000000001';
 const biaId = '10000000-0000-4000-8000-000000000002';
 const publicationId = randomUUID();
@@ -34,6 +36,7 @@ before(async () => {
 after(async () => {
   await db.communication.deleteMany({ where: { id: publicationId } });
   if (created) await db.agendaEvent.deleteMany({ where: { id: created } });
+  if (createdOfficeSeedRun) await db.agentSeedRun.deleteMany({ where: { id: createdOfficeSeedRun } });
   if (hidden) await db.student.deleteMany({ where: { id: hidden.id } });
   await app?.close(); await db.$disconnect();
 });
@@ -137,4 +140,84 @@ test('sessão retoma em recargas sem invalidar outra aba e logout revoga cookie'
   assert.equal(first.body.csrfToken, second.body.csrfToken);
   await ana.post('/api/auth/logout').set('Origin', origin).set('X-CSRF-Token', csrfAna).send({}).expect(201);
   await ana.get('/api/auth/me').expect(401);
+});
+test('contexto interno do aluno exige token e retorna somente dados pedagogicos minimizados', async () => {
+  const teacher = (await marina.get('/api/auth/me').expect(200)).body.user;
+  const subject = await db.subject.create({
+    data: { classId: classA.id, name: `Ala1 integration ${randomUUID()}` },
+  });
+  try {
+    const path = `/api/internal/ai/classes/${classA.id}/students/${lucasId}/context`;
+    const query = { userId: teacher.id, subjectId: subject.id };
+    await request(server).get(path).query(query).expect(403);
+
+    const token = process.env.CORTEX_INTERNAL_TOKEN;
+    assert.ok(token);
+    const response = await request(server)
+      .get(path)
+      .query(query)
+      .set('X-Cortex-Internal-Token', token)
+      .expect(200);
+
+    assert.deepEqual(Object.keys(response.body.studentProfile).sort(), ['className', 'period', 'subjectName']);
+    assert.equal(response.body.studentProfile.className, classA.name);
+    assert.equal(response.body.studentProfile.subjectName, subject.name);
+    assert.equal(response.body.studentProfile.name, undefined);
+    assert.equal(response.body.studentId, undefined);
+  } finally {
+    await db.subject.delete({ where: { id: subject.id } });
+  }
+});
+test('execucao de seed exige docente, persiste o relatorio e lista o estado autorizado', async () => {
+  await marina.post('/api/ai/office/run-seed')
+    .set('Origin', origin)
+    .set('X-CSRF-Token', csrfMarina)
+    .send({ classId: classA.id, seedId: '#nao-existe' })
+    .expect(400);
+
+  await suporte.get(`/api/ai/office/state?classId=${classA.id}`).expect(403);
+
+  const response = await marina.post('/api/ai/office/run-seed')
+    .set('Origin', origin)
+    .set('X-CSRF-Token', csrfMarina)
+    .send({ classId: classA.id, seedId: '#teste3' })
+    .expect(201);
+  createdOfficeSeedRun = response.body.id;
+  assert.equal(response.body.seedId, '#teste3');
+  assert.equal(response.body.status, 'passed');
+
+  const persisted = await db.agentSeedRun.findUniqueOrThrow({
+    where: { id: createdOfficeSeedRun },
+  });
+  assert.equal(persisted.classId, classA.id);
+  assert.equal(persisted.requestedById, (await marina.get('/api/auth/me').expect(200)).body.user.id);
+  assert.equal(persisted.report.summary.passed, 1);
+
+  const state = await marina.get(`/api/ai/office/state?classId=${classA.id}`).expect(200);
+  assert.ok(state.body.runs.some(run => run.id === createdOfficeSeedRun));
+});
+test('office SSE streams only events for its class', async () => {
+  const telemetry = new OfficeTelemetryService();
+  const eventPromise = firstValueFrom(telemetry.stream(classA.id).pipe(take(1)));
+  telemetry.publish(classB.id, {
+    type: 'room.transition',
+    runId: randomUUID(),
+    seedId: '#teste1',
+    room: 'security',
+    status: 'PASSED',
+    details: 'Outro contexto.',
+    timestamp: new Date().toISOString(),
+  });
+  telemetry.publish(classA.id, {
+    type: 'room.transition',
+    runId: randomUUID(),
+    seedId: '#teste2',
+    room: 'customer',
+    status: 'LOADED',
+    details: 'Contexto autorizado.',
+    timestamp: new Date().toISOString(),
+  });
+  const event = await eventPromise;
+  assert.equal(event.type, 'room.transition');
+  assert.equal(event.data.room, 'customer');
 });

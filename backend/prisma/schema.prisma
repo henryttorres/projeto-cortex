@@ -48,6 +48,7 @@ model Account {
   reviewedLessonDrafts LessonDraft[] @relation("LessonDraftReviewer")
   reportedLearningGaps LearningGap[] @relation("LearningGapReporter")
   generatedDiagnoses ClassDiagnosis[]
+  agentSeedRuns AgentSeedRun[] @relation("AgentSeedRunRequester")
   createdAt DateTime @default(now())
 }
 model AccountRole {
@@ -89,6 +90,7 @@ model SchoolClass {
   ragChunks RagDocumentChunk[]
   learningGaps LearningGap[]
   diagnoses ClassDiagnosis[]
+  agentSeedRuns AgentSeedRun[]
   @@unique([name, period])
 }
 model Enrollment {
@@ -325,6 +327,25 @@ model TicketCycle {
   resolver Account? @relation(fields: [resolverId], references: [id], onDelete: Restrict)
   @@index([ticketId, startedAt])
   @@index([closedAt, resolverId])
+}
+
+enum AgentSeedRunStatus {
+  passed
+  failed
+}
+
+model AgentSeedRun {
+  id String @id @default(uuid()) @db.Uuid
+  seedId String @db.VarChar(16)
+  status AgentSeedRunStatus
+  classId String @db.Uuid
+  requestedById String @db.Uuid
+  report Json @db.JsonB
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  schoolClass SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  requestedBy Account @relation("AgentSeedRunRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  @@index([classId, createdAt, id])
+  @@index([requestedById, createdAt, id])
 }
 
 model SupportTeam {
