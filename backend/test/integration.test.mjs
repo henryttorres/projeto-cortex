@@ -228,6 +228,16 @@ test('office chat authorizes a subject and publishes ADK trace events to SSE', a
     data: { classId: classA.id, name: `Office chat ${randomUUID()}` },
   });
   createdOfficeChatSubject = subject.id;
+  await db.ragDocumentChunk.create({
+    data: {
+      classId: classA.id,
+      subjectId: subject.id,
+      title: 'Função afim',
+      sourceName: 'Material local',
+      chunkIndex: 0,
+      content: 'Uma função afim tem a forma f(x)=ax+b.',
+    },
+  });
 
   const trace = ['reception', 'security', 'customer', 'professor', 'supervisor'].map((room, index) => ({
     room,
@@ -237,6 +247,7 @@ test('office chat authorizes a subject and publishes ADK trace events to SSE', a
   }));
   let createdSession;
   let deletedSession = false;
+  let adkMode = 'live';
   const fakeAdk = createServer(async (req, res) => {
     if (req.method === 'POST' && req.url?.endsWith('/sessions')) {
       let body = '';
@@ -247,8 +258,18 @@ test('office chat authorizes a subject and publishes ADK trace events to SSE', a
       return;
     }
     if (req.method === 'POST' && req.url === '/run_sse') {
+      if (adkMode === 'rate-limit') {
+        res.writeHead(429);
+        res.end();
+        return;
+      }
       res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8' });
       const send = event => res.write(`data: ${JSON.stringify(event)}\n\n`);
+      if (adkMode === 'empty') {
+        send({ turnComplete: true, content: { parts: [] } });
+        res.end();
+        return;
+      }
       send({ actions: { state_delta: { office_trace: trace.slice(0, 2) } } });
       send({ actions: { stateDelta: { office_trace: trace } } });
       send({ turnComplete: true, content: { parts: [{ text: 'Resposta simulada do ADK.' }] } });
@@ -306,15 +327,31 @@ test('office chat authorizes a subject and publishes ADK trace events to SSE', a
       .send({ classId: classA.id, subjectId: subject.id, message: 'Explique a ideia principal.' })
       .expect(201);
     assert.equal(response.body.answer, 'Resposta simulada do ADK.');
+    assert.equal(response.body.mode, 'live');
     assert.ok(deletedSession);
     assert.equal(createdSession.state.cortex_user_id, (await marina.get('/api/auth/me').expect(200)).body.user.id);
     assert.equal(createdSession.state.cortex_class_id, classA.id);
     assert.equal(createdSession.state.cortex_subject_id, subject.id);
 
+    for (const mode of ['empty', 'rate-limit']) {
+      adkMode = mode;
+      deletedSession = false;
+      const fallback = await marina.post('/api/ai/office/chat')
+        .set('Origin', origin)
+        .set('X-CSRF-Token', csrfMarina)
+        .send({ classId: classA.id, subjectId: subject.id, message: 'Explique a função afim.' })
+        .expect(201);
+      assert.equal(fallback.body.mode, 'simulation');
+      assert.match(fallback.body.answer, /SIMULACAO LOCAL/);
+      assert.match(fallback.body.answer, /f\(x\)=ax\+b/);
+      assert.ok(deletedSession);
+    }
+
     const transitions = received.filter(event => event.type === 'room.transition').map(event => event.data);
     assert.deepEqual(transitions.map(event => event.room), trace.map(event => event.room));
     assert.ok(received.some(event => event.type === 'chat.started'));
     assert.ok(received.some(event => event.type === 'chat.completed'));
+    assert.equal(received.filter(event => event.type === 'chat.simulated').length, 2);
     assert.ok(transitions.every(event => event.seedId === undefined));
   } finally {
     subscription.unsubscribe();

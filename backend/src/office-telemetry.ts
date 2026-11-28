@@ -26,6 +26,7 @@ import { Observable, Subject, filter, from, map, switchMap } from 'rxjs';
 import { AuthRequest, SessionGuard } from './auth';
 import { AccessService } from './access.service';
 import { PrismaService } from './prisma.service';
+import { searchRagChunks } from './rag-ingest';
 
 const SEED_IDS = ['#teste1', '#teste2', '#teste3', '#teste4', '#teste5'] as const;
 type SeedId = typeof SEED_IDS[number];
@@ -59,6 +60,8 @@ interface OfficeEvent {
   details: string;
   timestamp: string;
 }
+
+class AdkUnavailableError extends Error {}
 
 export class RunSeedDto {
   @IsUUID('4') classId!: string;
@@ -112,7 +115,7 @@ function parseSseBlock(block: string): Record<string, unknown> | null {
 }
 
 async function* readAdkEvents(response: Response): AsyncGenerator<Record<string, unknown>> {
-  if (!response.body) throw new BadGatewayException('O servico ADK nao enviou um fluxo de eventos.');
+  if (!response.body) throw new AdkUnavailableError('O ADK nao enviou um fluxo de eventos.');
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -399,12 +402,16 @@ export class OfficeTelemetryController {
         response = await fetch(url, { ...init, signal: AbortSignal.timeout(120000) });
       } catch (error) {
         if (error instanceof Error) {
-          throw new BadGatewayException('O servico ADK esta indisponivel ou excedeu o tempo limite.');
+          throw new AdkUnavailableError('O servico ADK esta indisponivel ou excedeu o tempo limite.');
         }
         throw error;
       }
       if (!response.ok) {
+        const status = response.status;
         await response.body?.cancel();
+        if (status === 429 || status >= 500) {
+          throw new AdkUnavailableError(`O servico ADK respondeu com HTTP ${status}.`);
+        }
         throw new BadGatewayException('O servico ADK nao conseguiu processar a solicitacao.');
       }
       return response;
@@ -464,16 +471,18 @@ export class OfficeTelemetryController {
         const text = adkEventText(event);
         if (adkTurnComplete(event) && text) answer = text;
       }
-      if (!answer) throw new BadGatewayException('O servico ADK nao retornou uma resposta textual.');
+      if (!answer) throw new AdkUnavailableError('O servico ADK nao retornou uma resposta textual.');
     } catch (error) {
       failure = error;
     }
 
+    let cleanupFailed = false;
     if (sessionCreated) {
       try {
         const deleteResponse = await requestAdk(sessionItemUrl, { method: 'DELETE', headers });
         await deleteResponse.body?.cancel();
       } catch (error) {
+        cleanupFailed = true;
         if (failure === undefined) failure = error;
         else this.logger.error(
           'Falha ao remover a sessao ADK apos erro no chat.',
@@ -482,7 +491,37 @@ export class OfficeTelemetryController {
       }
     }
 
-    if (failure !== undefined) {
+    let simulated = false;
+    if (failure instanceof AdkUnavailableError && !answer && !cleanupFailed) {
+      try {
+        const chunks = await searchRagChunks(this.db, {
+          classId: dto.classId,
+          subjectId: dto.subjectId,
+          query: dto.message,
+          limit: 3,
+        });
+        answer = chunks.length
+          ? [
+            'SIMULACAO LOCAL — o ADK nao produziu resposta. Os trechos abaixo foram recuperados do acervo para revisao humana; nao sao uma explicacao gerada por IA.',
+            ...chunks.map(chunk => `[${chunk.title} · ${chunk.sourceName} · trecho ${chunk.chunkIndex + 1} · ${chunk.id}]\n${chunk.content}`),
+          ].join('\n\n')
+          : 'SIMULACAO LOCAL — o ADK nao produziu resposta e nenhum trecho relacionado foi encontrado no acervo desta disciplina. Tente novamente quando o ADK estiver disponivel.';
+        simulated = true;
+        this.logger.warn('ADK indisponivel; resposta local de demonstracao baseada no acervo.');
+        this.telemetry.publish(dto.classId, {
+          type: 'chat.simulated',
+          runId,
+          room: 'reception',
+          status: 'SIMULATED',
+          details: 'ADK indisponivel; resposta local baseada no acervo para revisao humana.',
+          timestamp: timestamp(),
+        });
+      } catch (error) {
+        failure = error;
+      }
+    }
+
+    if (failure !== undefined && !simulated) {
       this.telemetry.publish(dto.classId, {
         type: 'chat.failed',
         runId,
@@ -494,6 +533,8 @@ export class OfficeTelemetryController {
       throw failure;
     }
 
+    if (simulated) return { answer, runId, mode: 'simulation' };
+
     this.telemetry.publish(dto.classId, {
       type: 'chat.completed',
       runId,
@@ -502,7 +543,7 @@ export class OfficeTelemetryController {
       details: 'Resposta revisada pelo fluxo do escritorio.',
       timestamp: timestamp(),
     });
-    return { answer, runId };
+    return { answer, runId, mode: 'live' };
   }
 
   @Get('state')

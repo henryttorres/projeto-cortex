@@ -12,6 +12,7 @@
 | 5 | Concluida | Interface do escritorio implementada e Portao 5 validado. |
 | 6 | Concluida | Validacao cruzada aprovada; commits atomicos criados na branch `dev`. |
 | 7 | Concluida | Planta pixel-art e chat ADK implementados; Portao 7 validado (evidencias abaixo). |
+| 8 | Concluida | Chat exercitado com a disciplina de teste; falha do ADK identificada e fallback local validado. |
 
 ## Etapa 0 — evidencias
 
@@ -266,7 +267,7 @@ Nenhum `git push` foi executado.
 - `npm run build` em `frontend/`: TypeScript e Vite concluidos; 33 modulos transformados.
 - Navegador local: clique no agente Coordinator no canvas selecionou Recepcao no inspetor e carregou `/office/agents/coordinator-idle.webp`.
 - `git diff --check`: passou.
-- Nao foi feita chamada a modelo ao vivo. O teste de integracao usa um servidor ADK simulado; a turma `2º ano A` atualmente nao tem disciplinas, entao o chat real permanece desabilitado ate uma disciplina ser cadastrada.
+- No momento do Portao 7, nao foi feita chamada a modelo ao vivo e a turma `2º ano A` ainda nao tinha disciplina. O teste de integracao usou um servidor ADK simulado; a validacao posterior esta registrada na Etapa 8.
 - `#teste1` a `#teste5` continuam usando a simulacao local deterministica.
 
 ### Handover
@@ -275,3 +276,30 @@ Nenhum `git push` foi executado.
 - Para testar uma conversa real, cadastre uma disciplina na turma selecionada, abra o Escritorio IA e envie uma mensagem; NestJS e ADK devem estar ativos, com `CORTEX_INTERNAL_TOKEN` configurado nos dois servicos.
 - Para ajustes de interface, comecar em `frontend/src/CortexOffice.tsx` e `frontend/src/OfficePixelCanvas.tsx`; validar com `Set-Location frontend; npm run build`.
 - Para ajustes de endpoint/telemetria, comecar em `backend/src/office-telemetry.ts`; validar com `Set-Location backend; npm run build; npm test`.
+
+## Etapa 8 — teste da conversa e fallback de demonstracao
+
+### Arquivos criados ou alterados
+
+- `frontend/src/AiPanel.tsx`: validacao defensiva da resposta de diagnostico para evitar erro de renderizacao quando o backend retorna um objeto vazio ou campos opcionais ausentes.
+- `backend/src/office-telemetry.ts`: fallback identificado como simulacao local quando o ADK esta indisponivel ou conclui sem texto; usa apenas trechos autorizados da disciplina, emite `chat.simulated` e nao converte erros de autorizacao/dados em sucesso.
+- `backend/test/integration.test.mjs`: cobre resposta ADK vazia e HTTP 429, limpeza de sessao, rotulo local e evento SSE.
+- `frontend/src/CortexOffice.tsx` e `frontend/src/connected-portal.css`: exibem o modo de simulacao junto da resposta e reconhecem o evento terminal SSE `chat.simulated`.
+- `docs/OFFICE_PROGRESS.md`: evidencias e handover da Etapa 8.
+
+### Evidencias do Portao 8
+
+- Disciplina `Matematica` cadastrada na turma `2º ano A`; acervo contem um trecho de teste sobre funcao afim.
+- Uma requisicao real anterior chegou ao ADK, mas a API respondeu `502`: o fluxo do ADK terminou sem texto. Nao foi feita outra chamada ao modelo durante a validacao do fallback.
+- Teste visual executado pela mesma rota da interface com override temporario do ADK para uma porta local indisponivel: a mensagem exibiu `Simulacao local`, recuperou o trecho autorizado do acervo e o SSE mostrou `SIMULATED`. Nenhum pedido foi enviado ao modelo nesse teste.
+- `npm run build` em `backend/`: passou.
+- `npm test` em `backend/`: **15 testes passaram**, incluindo ADK sem texto e HTTP 429.
+- `npm run build` em `frontend/`: TypeScript e Vite concluiram com exit code 0.
+- API reiniciada sem o override temporario; `GET /list-apps` no ADK listou `cortex_agent`. PostgreSQL continuou ativo na porta `54329`; os servicos ADK e banco nao foram encerrados.
+- `git diff --check`: passou antes da atualizacao deste registro; repetir antes do commit.
+
+### Handover
+
+- Etapas 0–8 concluidas na branch `dev`. O commit da Etapa 7 ja foi enviado; esta etapa aguarda commit/push.
+- A conversa ao vivo com Gemini nao foi confirmada: a tentativa produziu resposta ADK vazia. O fallback esta funcional, mas deve permanecer identificado como simulacao.
+- Proximo passo exato: executar `git diff --check`, conferir `git status --short`, adicionar somente `backend/src/office-telemetry.ts`, `backend/test/integration.test.mjs`, `frontend/src/AiPanel.tsx`, `frontend/src/CortexOffice.tsx`, `frontend/src/connected-portal.css` e `docs/OFFICE_PROGRESS.md`; nao incluir `referencias/fragmentos/`. Fazer commit com trailer de coautoria e enviar `dev` para `origin`.

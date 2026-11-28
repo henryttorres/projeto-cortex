@@ -33,7 +33,7 @@ type SeedRun = {
 type OfficeState = { runs: SeedRun[] };
 type OfficeEvent = OfficeTrace & { type: string; runId: string; seedId?: string };
 type Subject = { id: string; name: string };
-type ChatMessage = { role: 'user' | 'assistant'; text: string };
+type ChatMessage = { role: 'user' | 'assistant'; text: string; mode?: 'live' | 'simulation' };
 type Room = {
   id: string;
   title: string;
@@ -210,7 +210,7 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
       }
       if (!active) return;
       setEvents(previous => [...previous, payload].slice(-60));
-      const terminal = ['seed.completed', 'seed.failed', 'chat.completed', 'chat.failed'].includes(payload.type);
+      const terminal = ['seed.completed', 'seed.failed', 'chat.completed', 'chat.failed', 'chat.simulated'].includes(payload.type);
       setActiveRoom(terminal ? '' : payload.room);
       if (payload.type === 'seed.started' && payload.seedId) setRunningSeed(payload.seedId);
       if (payload.type === 'seed.completed' || payload.type === 'seed.failed') {
@@ -218,7 +218,7 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
         void refreshState();
       }
     };
-    const eventTypes = ['seed.started', 'room.transition', 'seed.completed', 'seed.failed', 'chat.started', 'chat.completed', 'chat.failed'];
+    const eventTypes = ['seed.started', 'room.transition', 'seed.completed', 'seed.failed', 'chat.started', 'chat.completed', 'chat.failed', 'chat.simulated'];
     for (const eventType of eventTypes) stream.addEventListener(eventType, receive);
     stream.onopen = () => { if (active) setStreamStatus('connected'); };
     stream.onerror = () => {
@@ -278,11 +278,11 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
     setError('');
     setNotice('');
     try {
-      const response = await api<{ answer: string }>('/ai/office/chat', {
+      const response = await api<{ answer: string; mode: 'live' | 'simulation' }>('/ai/office/chat', {
         method: 'POST',
         body: JSON.stringify({ classId, subjectId: selectedSubjectId, message }),
       });
-      setChatMessages(previous => [...previous, { role: 'assistant', text: response.answer }]);
+      setChatMessages(previous => [...previous, { role: 'assistant', text: response.answer, mode: response.mode }]);
     } catch (err) {
       handleError(err);
     } finally {
@@ -371,6 +371,7 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
         {chatMessages.length
           ? chatMessages.map((message, index) => <article className={`office-chat__message office-chat__message--${message.role}`} key={`${message.role}-${index}`}>
             <strong>{message.role === 'user' ? 'Você' : 'Escritório Cortéx'}</strong>
+            {message.mode === 'simulation' && <span className="office-chat__simulation-note">Simulação local · trechos do acervo para revisão humana; sem resposta do modelo</span>}
             <p>{message.text}</p>
           </article>)
           : <p className="office-chat__empty">A conversa usará o acervo e as ferramentas da disciplina selecionada.</p>}

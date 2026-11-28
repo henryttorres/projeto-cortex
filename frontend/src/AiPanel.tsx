@@ -5,14 +5,21 @@ type Subject = { id: string; name: string };
 type GapKind = 'duvida_recorrente' | 'tentativa_cola' | 'erro_conceitual';
 type LearningGap = { id: string; subjectId: string | null; kind: GapKind; description: string; createdAt: string };
 type Diagnosis = {
-  totalGaps: number;
   summary: string;
   recommendations: string;
-  indicators: Record<GapKind, number>;
+  indicators?: Partial<Record<GapKind, number>> | null;
   createdAt: string;
-  generatedBy: { name: string };
-  subject: { name: string } | null;
+  generatedBy?: { name: string } | null;
 } | null;
+
+function isDiagnosis(value: unknown): value is NonNullable<Diagnosis> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const diagnosis = value as Record<string, unknown>;
+  return typeof diagnosis.summary === 'string'
+    && typeof diagnosis.recommendations === 'string'
+    && typeof diagnosis.createdAt === 'string'
+    && Number.isFinite(Date.parse(diagnosis.createdAt));
+}
 type Citation = { id: string; title: string; sourceName: string; chunkIndex: number };
 type AssistantResponse = { answer: string; citations: Citation[] };
 
@@ -78,11 +85,11 @@ export default function AiPanel({ classId, className, onSessionExpired }: {
     const query = `?subjectId=${encodeURIComponent(subjectId)}`;
     Promise.all([
       api<LearningGap[]>(`/classes/${classId}/learning-gaps${query}`),
-      api<Diagnosis>(`/classes/${classId}/diagnosis${query}`),
+      api<unknown>(`/classes/${classId}/diagnosis${query}`),
     ]).then(([nextGaps, nextDiagnosis]) => {
       if (!active) return;
       setGaps(nextGaps);
-      setDiagnosis(nextDiagnosis);
+      setDiagnosis(isDiagnosis(nextDiagnosis) ? nextDiagnosis : null);
     }).catch(err => {
       if (active) handleError(err);
     }).finally(() => {
@@ -238,9 +245,9 @@ export default function AiPanel({ classId, className, onSessionExpired }: {
           <button className="button button--primary" disabled={saving || loading}>Registrar lacuna</button>
         </form>
         {diagnosis && <article className="ai-diagnosis">
-          <p className="eyebrow">Diagnóstico · {new Date(diagnosis.createdAt).toLocaleString('pt-BR')} · {diagnosis.generatedBy.name}</p>
+          <p className="eyebrow">Diagnóstico · {new Date(diagnosis.createdAt).toLocaleString('pt-BR')}{diagnosis.generatedBy?.name ? ` · ${diagnosis.generatedBy.name}` : ''}</p>
           <p>{diagnosis.summary}</p><p><strong>Recomendações:</strong> {diagnosis.recommendations}</p>
-          <ul>{Object.entries(diagnosis.indicators).map(([kind, count]) => <li key={kind}>{gapLabels[kind as GapKind]}: {count}</li>)}</ul>
+          {diagnosis.indicators && <ul>{Object.entries(diagnosis.indicators).map(([kind, count]) => <li key={kind}>{gapLabels[kind as GapKind]}: {count}</li>)}</ul>}
         </article>}
         {loading ? <p role="status">Carregando lacunas…</p> : gaps.length
           ? <div className="ai-gap-list">{gaps.map(gap => <article key={gap.id}>

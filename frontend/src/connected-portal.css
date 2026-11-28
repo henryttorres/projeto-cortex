@@ -203,7 +203,8 @@
 .office-chat__messages { display: grid; gap: .65rem; max-height: 18rem; overflow: auto; padding: .75rem; border: 1px solid #00F0FF; border-radius: 8px; }
 .office-chat__message { padding: .6rem .75rem; border-left: 2px solid #00F0FF; }
 .office-chat__message p { margin: .35rem 0 0; color: #00F0FF; white-space: pre-wrap; overflow-wrap: anywhere; }
-.office-chat__message strong, .office-chat__empty, .office-chat__pending { color: #00F0FF; }
+.office-chat__message strong, .office-chat__simulation-note, .office-chat__empty, .office-chat__pending { color: #00F0FF; }
+.office-chat__simulation-note { display: block; margin-top: .35rem; font-size: .72rem; }
 .office-chat__message--user { justify-self: end; width: min(85%, 42rem); }
 .office-chat__message--assistant { justify-self: start; width: min(95%, 48rem); }
 .office-chat__form { display: grid; gap: .55rem; }
