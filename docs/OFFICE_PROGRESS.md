@@ -182,6 +182,7 @@
 - `frontend/src/office-assets.ts`: descoberta de imagens/videos opcionais e fallback leve; video limitado a sala ativa/selecionada.
 - `frontend/src/ConnectedPortal.tsx` e `frontend/src/connected-portal.css`: aba autenticada para docentes/admin, layout escuro e responsivo.
 - `frontend/public/office/agents/README.md` e `frontend/public/office/rooms/README.md`: convencoes para avatares Higgsfield e fundos Google Flow Studio.
+- `frontend/public/office/agents/*-idle.webp`: sete retratos de identidade exportados do Google Flow e otimizados para a planta.
 - `docs/ui-feature-map.md`: mapa atualizado com a secao, acesso e endpoints implementados.
 
 ### Portao de Verificacao 5
@@ -191,6 +192,7 @@
 - `git diff --check`: passou.
 - A validacao visual autenticada foi concluida com a conta local de desenvolvimento: a turma 2º ano A abriu, o stream conectou e as seis salas apareceram.
 - A primeira captura revelou que o Vite responde `200 text/html` para assets opcionais inexistentes. O detector agora valida `Content-Type` para usar os fallbacks SVG/CSS; a captura seguinte confirmou que os avatares de fallback aparecem sem imagens quebradas.
+- Depois, sete retratos foram convertidos para WebP de 512x512; a validacao no navegador confirmou **7 imagens carregadas, 0 falhas**.
 
 ### Portao 5 — validado
 
@@ -218,8 +220,10 @@ Os criterios automatizados definidos para a Etapa 5 passaram. A validacao ponta 
 - `npm run build` em `backend/`: TypeScript compilado.
 - `npm test` em `backend/`: **14 testes passaram**, incluindo persistencia e SSE.
 - `npm run build` em `frontend/`: TypeScript e Vite concluidos; 32 modulos transformados.
+- O build de producao copiou os **7 retratos WebP** para `dist/office/agents/`; os arquivos ficaram entre 12.7 e 24.0 KiB.
+- Pillow 13.0.0 foi usado somente no `.venv` local para a conversao; nenhuma dependencia da aplicacao foi adicionada.
 - `ai-agent\.venv\Scripts\python.exe -m cortex_agent.evals.run_seed_evals --all` em `ai-agent/`: **5 seeds passaram, 0 falhas**.
-- Validacao no navegador local autenticado: Escritório IA renderizou as seis salas, mostrou `Stream conectado` e exibiu avatares SVG quando os arquivos opcionais nao existem.
+- Validacao no navegador local autenticado: Escritório IA renderizou as seis salas, mostrou `Stream conectado`, `APPROVED` e os sete retratos do Flow.
 - `HEAD` para os assets ausentes retornava `200 text/html`; apos o ajuste de `Content-Type`, os fallbacks renderizam corretamente.
 - `git diff --check`: passou antes dos commits e nas alteracoes de documentacao.
 - `.env`, `.venv`, `__pycache__`, `.adk`, `.worktrees` e `.local-data` nao foram adicionados.
