@@ -300,6 +300,6 @@ Nenhum `git push` foi executado.
 
 ### Handover
 
-- Etapas 0–8 concluidas na branch `dev`. O commit da Etapa 7 ja foi enviado; esta etapa aguarda commit/push.
+- Etapas 0–8 concluidas na branch `dev`; commit `9cc030a` enviado para `origin/dev`.
 - A conversa ao vivo com Gemini nao foi confirmada: a tentativa produziu resposta ADK vazia. O fallback esta funcional, mas deve permanecer identificado como simulacao.
-- Proximo passo exato: executar `git diff --check`, conferir `git status --short`, adicionar somente `backend/src/office-telemetry.ts`, `backend/test/integration.test.mjs`, `frontend/src/AiPanel.tsx`, `frontend/src/CortexOffice.tsx`, `frontend/src/connected-portal.css` e `docs/OFFICE_PROGRESS.md`; nao incluir `referencias/fragmentos/`. Fazer commit com trailer de coautoria e enviar `dev` para `origin`.
+- Proximo passo exato: antes de uma nova chamada ao modelo, diagnosticar a resposta ADK vazia verificando a configuracao de `ai-agent/cortex_agent/.env` sem exibir segredos e os logs/processo que atende a porta `8000`; nao repetir o envio enquanto cota e chave nao forem confirmadas. Se o diagnostico exigir alteracao no backend, comecar em `backend/src/office-telemetry.ts` e executar `Set-Location backend; npm run build; npm test`.
