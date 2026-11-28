@@ -1,3 +1,4 @@
 google-adk==2.15.1
+litellm==1.106.2
 httpx==0.28.1
 pydantic>=2.12,<3

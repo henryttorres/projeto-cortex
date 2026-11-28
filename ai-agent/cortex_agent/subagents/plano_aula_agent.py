@@ -1,14 +1,14 @@
 from google.adk.agents.llm_agent import Agent
 
-from ..settings import MODEL, retry_config
+from ..settings import MODEL_SMART, get_generate_config
 from ..tools.acervo_tool import buscar_acervo
 from ..tools.lacuna_tool import consultar_lacunas
 
 plano_aula_agent = Agent(
-    model=MODEL,
+    model=MODEL_SMART,
     name="plano_aula_agent",
     description="Sugere um planejamento estruturado de aula para revisão docente.",
-    generate_content_config=retry_config,
+    generate_content_config=get_generate_config(MODEL_SMART),
     instruction="""
 Crie sugestões em português brasileiro com título, objetivos, materiais,
 atividades e avaliação. Consulte o acervo e as lacunas quando forem pertinentes;

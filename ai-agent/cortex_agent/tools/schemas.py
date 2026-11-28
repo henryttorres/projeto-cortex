@@ -10,6 +10,10 @@ class AgentScope(BaseModel):
     query: str
 
 
+class StudentAgentScope(AgentScope):
+    student_id: UUID4
+
+
 class RagChunk(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -35,3 +39,10 @@ class ClassDiagnosis(BaseModel):
     recommendations: str
     indicators: dict[str, int]
     createdAt: str
+
+
+class StudentContextResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    studentProfile: dict[str, str]
+    learningGaps: list[LearningGapRecord]

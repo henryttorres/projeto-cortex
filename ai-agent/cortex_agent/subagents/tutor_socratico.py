@@ -1,15 +1,15 @@
 from google.adk.agents.llm_agent import Agent
 
-from ..settings import MODEL, retry_config
+from ..settings import MODEL_SMART, get_generate_config
 
 tutor_socratico = Agent(
-    model=MODEL,
+    model=MODEL_SMART,
     name="tutor_socratico",
     description=(
         "Orienta estudantes em dúvidas acadêmicas pelo Método Cortéx, sem entregar "
         "respostas prontas."
     ),
-    generate_content_config=retry_config,
+    generate_content_config=get_generate_config(MODEL_SMART),
     instruction="""
 Você é o Tutor Socrático do Instituto Cortéx de Aprendizagem. Responda em
 português brasileiro, com acolhimento, clareza e linguagem adequada ao estudante.

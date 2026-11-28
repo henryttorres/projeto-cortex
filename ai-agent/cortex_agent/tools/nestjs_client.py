@@ -4,7 +4,14 @@ import httpx
 from google.adk.tools import ToolContext
 from pydantic import TypeAdapter
 
-from .schemas import AgentScope, ClassDiagnosis, LearningGapRecord, RagChunk
+from .schemas import (
+    AgentScope,
+    ClassDiagnosis,
+    LearningGapRecord,
+    RagChunk,
+    StudentAgentScope,
+    StudentContextResponse,
+)
 
 
 def get_scope(tool_context: ToolContext) -> AgentScope:
@@ -50,6 +57,14 @@ async def get_learning_gaps(scope: AgentScope) -> list[LearningGapRecord]:
         scope,
     )
     return TypeAdapter(list[LearningGapRecord]).validate_python(result)
+
+
+async def get_student_context(scope: StudentAgentScope) -> StudentContextResponse:
+    result = await _get(
+        f"/internal/ai/classes/{scope.class_id}/students/{scope.student_id}/context",
+        scope,
+    )
+    return StudentContextResponse.model_validate(result)
 
 
 async def get_class_diagnosis(scope: AgentScope) -> ClassDiagnosis | None:

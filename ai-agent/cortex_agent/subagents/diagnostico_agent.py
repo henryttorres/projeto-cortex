@@ -1,14 +1,14 @@
 from google.adk.agents.llm_agent import Agent
 
-from ..settings import MODEL, retry_config
+from ..settings import MODEL_SMART, get_generate_config
 from ..tools.diagnostico_tool import consultar_diagnostico
 from ..tools.lacuna_tool import consultar_lacunas
 
 diagnostico_agent = Agent(
-    model=MODEL,
+    model=MODEL_SMART,
     name="diagnostico_agent",
     description="Interpreta indicadores de turma com transparência e recomendações pedagógicas.",
-    generate_content_config=retry_config,
+    generate_content_config=get_generate_config(MODEL_SMART),
     instruction="""
 Consulte o diagnóstico e as lacunas antes de responder. Separe os indicadores
 observados das hipóteses; não atribua causalidade nem exponha dados pessoais.
