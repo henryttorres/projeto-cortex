@@ -5,16 +5,19 @@ import {
   ForbiddenException,
   Get,
   Injectable,
+  Logger,
   MessageEvent,
   ParseUUIDPipe,
   Post,
   Query,
   Req,
   Sse,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { IsIn, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsIn, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
@@ -50,7 +53,7 @@ interface SeedEvaluationReport {
 interface OfficeEvent {
   type: string;
   runId: string;
-  seedId: SeedId;
+  seedId?: SeedId;
   room: string;
   status: string;
   details: string;
@@ -66,6 +69,13 @@ export class OfficeStateQueryDto {
   @IsUUID('4') classId!: string;
 }
 
+export class OfficeChatDto {
+  @IsUUID('4') classId!: string;
+  @IsUUID('4') subjectId!: string;
+  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @IsString() @MinLength(1) @MaxLength(4000) message!: string;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -76,6 +86,89 @@ function isSeedTraceEntry(value: unknown): value is SeedTraceEntry {
     && typeof value.status === 'string'
     && typeof value.details === 'string'
     && typeof value.timestamp === 'string';
+}
+
+function parseAdkEvent(value: string): Record<string, unknown> {
+  let event: unknown;
+  try {
+    event = JSON.parse(value);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new BadGatewayException('O servico ADK retornou um evento invalido.');
+    }
+    throw error;
+  }
+  if (!isRecord(event)) throw new BadGatewayException('O servico ADK retornou um evento invalido.');
+  return event;
+}
+
+function parseSseBlock(block: string): Record<string, unknown> | null {
+  const data = block
+    .split(/\r?\n/)
+    .filter(line => line.startsWith('data:'))
+    .map(line => line.slice(5).trimStart())
+    .join('\n');
+  return data ? parseAdkEvent(data) : null;
+}
+
+async function* readAdkEvents(response: Response): AsyncGenerator<Record<string, unknown>> {
+  if (!response.body) throw new BadGatewayException('O servico ADK nao enviou um fluxo de eventos.');
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      buffer += decoder.decode(value, { stream: !done });
+      let separator = /\r?\n\r?\n/.exec(buffer);
+      while (separator) {
+        const block = buffer.slice(0, separator.index);
+        buffer = buffer.slice(separator.index + separator[0].length);
+        const event = parseSseBlock(block);
+        if (event) yield event;
+        separator = /\r?\n\r?\n/.exec(buffer);
+      }
+      if (done) break;
+    }
+    if (buffer.trim()) {
+      const event = parseSseBlock(buffer);
+      if (event) yield event;
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+function officeTraceFromAdkEvent(event: Record<string, unknown>): SeedTraceEntry[] {
+  const actions = isRecord(event.actions) ? event.actions : {};
+  const delta = isRecord(actions.stateDelta)
+    ? actions.stateDelta
+    : isRecord(actions.state_delta)
+      ? actions.state_delta
+      : isRecord(event.stateDelta)
+        ? event.stateDelta
+        : isRecord(event.state_delta)
+          ? event.state_delta
+          : null;
+  if (!delta || !Object.hasOwn(delta, 'office_trace')) return [];
+  if (!Array.isArray(delta.office_trace) || !delta.office_trace.every(isSeedTraceEntry)) {
+    throw new BadGatewayException('O servico ADK retornou uma transicao de sala invalida.');
+  }
+  return delta.office_trace;
+}
+
+function adkEventText(event: Record<string, unknown>): string {
+  if (!isRecord(event.content) || !Array.isArray(event.content.parts)) return '';
+  return event.content.parts
+    .filter(isRecord)
+    .map(part => part.text)
+    .filter((text): text is string => typeof text === 'string')
+    .join('\n')
+    .trim();
+}
+
+function adkTurnComplete(event: Record<string, unknown>): boolean {
+  return event.turnComplete === true || event.turn_complete === true;
 }
 
 function parseSeedReport(value: unknown, seedId: SeedId): SeedEvaluationReport {
@@ -200,6 +293,8 @@ export class SeedEvaluationService {
 @Controller('ai/office')
 @UseGuards(SessionGuard)
 export class OfficeTelemetryController {
+  private readonly logger = new Logger(OfficeTelemetryController.name);
+
   constructor(
     private readonly db: PrismaService,
     private readonly access: AccessService,
@@ -275,6 +370,139 @@ export class OfficeTelemetryController {
         });
       }
     }
+  }
+
+  @Post('chat')
+  async chat(@Body() dto: OfficeChatDto, @Req() req: AuthRequest) {
+    await this.authorizeTeacher(dto.classId, req);
+    if (!process.env.CORTEX_INTERNAL_TOKEN) {
+      throw new ServiceUnavailableException('Configure CORTEX_INTERNAL_TOKEN no NestJS e no agente ADK para habilitar o chat.');
+    }
+    const subject = await this.db.subject.findFirst({
+      where: { id: dto.subjectId, classId: dto.classId },
+      select: { id: true },
+    });
+    if (!subject) throw new ForbiddenException('A disciplina nao pertence a turma selecionada.');
+
+    const runId = randomUUID();
+    const sessionId = randomUUID();
+    const userId = req.principal.id;
+    const baseUrl = (process.env.CORTEX_ADK_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+    const encodedUserId = encodeURIComponent(userId);
+    const sessionUrl = `${baseUrl}/apps/cortex_agent/users/${encodedUserId}/sessions`;
+    const sessionItemUrl = `${sessionUrl}/${encodeURIComponent(sessionId)}`;
+    const headers = { 'Content-Type': 'application/json' };
+    const timestamp = () => new Date().toISOString();
+    const requestAdk = async (url: string, init: RequestInit): Promise<Response> => {
+      let response: Response;
+      try {
+        response = await fetch(url, { ...init, signal: AbortSignal.timeout(120000) });
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new BadGatewayException('O servico ADK esta indisponivel ou excedeu o tempo limite.');
+        }
+        throw error;
+      }
+      if (!response.ok) {
+        await response.body?.cancel();
+        throw new BadGatewayException('O servico ADK nao conseguiu processar a solicitacao.');
+      }
+      return response;
+    };
+
+    this.telemetry.publish(dto.classId, {
+      type: 'chat.started',
+      runId,
+      room: 'reception',
+      status: 'RUNNING',
+      details: 'Solicitacao enviada ao agente ADK.',
+      timestamp: timestamp(),
+    });
+
+    let sessionCreated = false;
+    let failure: unknown;
+    let answer = '';
+    try {
+      const createResponse = await requestAdk(sessionUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          sessionId,
+          state: {
+            cortex_user_id: userId,
+            cortex_class_id: dto.classId,
+            cortex_subject_id: dto.subjectId,
+            cortex_query: dto.message,
+          },
+        }),
+      });
+      sessionCreated = true;
+      await createResponse.body?.cancel();
+
+      const runResponse = await requestAdk(`${baseUrl}/run_sse`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          appName: 'cortex_agent',
+          userId,
+          sessionId,
+          newMessage: { role: 'user', parts: [{ text: dto.message }] },
+        }),
+      });
+      const publishedTrace = new Set<string>();
+      for await (const event of readAdkEvents(runResponse)) {
+        for (const trace of officeTraceFromAdkEvent(event)) {
+          const key = JSON.stringify(trace);
+          if (publishedTrace.has(key)) continue;
+          publishedTrace.add(key);
+          this.telemetry.publish(dto.classId, {
+            type: 'room.transition',
+            runId,
+            ...trace,
+          });
+        }
+        const text = adkEventText(event);
+        if (adkTurnComplete(event) && text) answer = text;
+      }
+      if (!answer) throw new BadGatewayException('O servico ADK nao retornou uma resposta textual.');
+    } catch (error) {
+      failure = error;
+    }
+
+    if (sessionCreated) {
+      try {
+        const deleteResponse = await requestAdk(sessionItemUrl, { method: 'DELETE', headers });
+        await deleteResponse.body?.cancel();
+      } catch (error) {
+        if (failure === undefined) failure = error;
+        else this.logger.error(
+          'Falha ao remover a sessao ADK apos erro no chat.',
+          error instanceof Error ? error.stack : undefined,
+        );
+      }
+    }
+
+    if (failure !== undefined) {
+      this.telemetry.publish(dto.classId, {
+        type: 'chat.failed',
+        runId,
+        room: 'reception',
+        status: 'FAILED',
+        details: 'A solicitacao ao agente ADK falhou.',
+        timestamp: timestamp(),
+      });
+      throw failure;
+    }
+
+    this.telemetry.publish(dto.classId, {
+      type: 'chat.completed',
+      runId,
+      room: 'supervisor',
+      status: 'COMPLETED',
+      details: 'Resposta revisada pelo fluxo do escritorio.',
+      timestamp: timestamp(),
+    });
+    return { answer, runId };
   }
 
   @Get('state')

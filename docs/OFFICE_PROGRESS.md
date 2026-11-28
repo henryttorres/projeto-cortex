@@ -11,6 +11,7 @@
 | 4 | Concluida | Ponte NestJS, persistencia e SSE implementados; Portao 4 validado (evidencias abaixo). |
 | 5 | Concluida | Interface do escritorio implementada e Portao 5 validado. |
 | 6 | Concluida | Validacao cruzada aprovada; commits atomicos criados na branch `dev`. |
+| 7 | Concluida | Planta pixel-art e chat ADK implementados; Portao 7 validado (evidencias abaixo). |
 
 ## Etapa 0 — evidencias
 
@@ -245,3 +246,32 @@ Nenhum `git push` foi executado.
 - A revisao visual autenticada do escritorio foi concluida; a sessao do navegador permanece aberta na tela do Escritório IA.
 - Uma conta admin de desenvolvimento foi provisionada somente no banco local para essa validacao; a senha nao foi gravada no repositorio.
 - `referencias/fragmentos/` foi preservada, sem ser adicionada ao Git.
+
+## Etapa 7 — planta pixel-art e conversa ADK
+
+### Arquivos criados ou alterados
+
+- `frontend/src/OfficePixelCanvas.tsx`: canvas original com seis salas e area de descanso, paleta `#0A192F` / `#00F0FF`, agentes pixel-art com estados idle, ping-pong, walking, working e alert, e selecao por clique.
+- `frontend/src/CortexOffice.tsx`: integracao do canvas com SSE, inspetor/retrato do agente selecionado e caixa "Conversar com o Escritorio"; `#teste1` a `#teste5` continuam no endpoint de simulacao offline.
+- `frontend/src/connected-portal.css`: estilos da planta, seletores de agentes, retrato e chat.
+- `backend/src/office-telemetry.ts`: `POST /api/ai/office/chat`, autorizacao docente/turma/disciplina, sessao ADK efemera em `8000`, leitura/deduplicacao de `office_trace` e eventos de chat no SSE.
+- `backend/test/integration.test.mjs`: teste com ADK simulado para autorizacao, escopo da disciplina, limite de entrada, limpeza de sessao e transicoes SSE.
+- `docs/OFFICE_PROGRESS.md`: evidencias e handover desta etapa.
+
+### Portao 7 — validado
+
+- Inspecao de referencia limitada aos arquivos client-side de interface, canvas, layout e simulacao de Habblaud; hooks de CLI, auth, Docker e servidor foram ignorados. A implementacao Cortéx e original.
+- `npm run build` em `backend/`: TypeScript compilado com exit code 0.
+- `npm test` em `backend/`: **15 testes passaram**, incluindo o fluxo de chat e transicoes ADK/SSE simuladas.
+- `npm run build` em `frontend/`: TypeScript e Vite concluidos; 33 modulos transformados.
+- Navegador local: clique no agente Coordinator no canvas selecionou Recepcao no inspetor e carregou `/office/agents/coordinator-idle.webp`.
+- `git diff --check`: passou.
+- Nao foi feita chamada a modelo ao vivo. O teste de integracao usa um servidor ADK simulado; a turma `2º ano A` atualmente nao tem disciplinas, entao o chat real permanece desabilitado ate uma disciplina ser cadastrada.
+- `#teste1` a `#teste5` continuam usando a simulacao local deterministica.
+
+### Handover
+
+- Etapas 0–7 concluidas na branch `dev`; Portao 7 validado. Nenhum push foi executado.
+- Para testar uma conversa real, cadastre uma disciplina na turma selecionada, abra o Escritorio IA e envie uma mensagem; NestJS e ADK devem estar ativos, com `CORTEX_INTERNAL_TOKEN` configurado nos dois servicos.
+- Para ajustes de interface, comecar em `frontend/src/CortexOffice.tsx` e `frontend/src/OfficePixelCanvas.tsx`; validar com `Set-Location frontend; npm run build`.
+- Para ajustes de endpoint/telemetria, comecar em `backend/src/office-telemetry.ts`; validar com `Set-Location backend; npm run build; npm test`.

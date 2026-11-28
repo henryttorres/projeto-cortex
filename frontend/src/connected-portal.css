@@ -179,3 +179,34 @@
 @media(max-width: 900px) { .office-workspace { grid-template-columns: 1fr; } .office-floor { min-height: 26rem; } .office-inspector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem 1rem; } .office-inspector__logs { grid-column: 1 / -1; } }
 @media(max-width: 650px) { .office-floor { grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 38rem; } .office-floor__connectors { opacity: .5; } .office-seed-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); } .office-seed-details { grid-template-columns: 1fr; } .office-inspector { display: block; } .office-history li button { grid-template-columns: auto auto; } .office-history time { grid-column: 1 / -1; justify-self: start; } }
 @media(prefers-reduced-motion: reduce) { .office-floor__signal { animation: none; } .office-room { transition: none; } }
+
+.office-floor { display: block; min-height: 0; padding: 0; overflow: visible; border: 0; background: transparent; }
+.office-pixel-scene { overflow-x: auto; border: 1px solid #00F0FF; border-radius: 12px; background: #0A192F; }
+.office-pixel-scene__canvas { display: block; width: 100%; min-width: 720px; height: auto; image-rendering: pixelated; }
+.office-pixel-scene__agent-list { display: flex; flex-wrap: wrap; gap: .4rem; padding: .65rem; border-top: 1px solid #00F0FF; }
+.office-pixel-scene__agent-list button { padding: .35rem .55rem; color: #00F0FF; background: #0A192F; border: 1px solid #00F0FF; border-radius: 6px; cursor: pointer; }
+.office-pixel-scene__agent-list button[aria-pressed="true"], .office-pixel-scene__agent-list button:hover { color: #0A192F; background: #00F0FF; }
+.office-pixel-scene__agent-list button:focus-visible, .office-chat button:focus-visible, .office-chat select:focus-visible, .office-chat textarea:focus-visible { outline: 2px solid #00F0FF; outline-offset: 2px; }
+.office-inspector__agent { display: flex; align-items: center; gap: .75rem; padding: .75rem 0; }
+.office-inspector__portrait { display: grid; width: 4.25rem; height: 4.25rem; flex: 0 0 auto; place-items: center; overflow: hidden; border: 1px solid #00F0FF; border-radius: 8px; background: #0A192F; }
+.office-inspector__portrait .office-avatar__media, .office-inspector__portrait .office-avatar__fallback { width: 100%; height: 100%; object-fit: cover; }
+.office-inspector__agent > div { display: grid; gap: .2rem; }
+.office-inspector__agent strong, .office-inspector__agent span { color: #00F0FF; }
+.office-chat { display: grid; gap: .85rem; padding: 1.1rem; color: #00F0FF; background: #0A192F; border: 1px solid #00F0FF; border-radius: 15px; }
+.office-chat__heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.office-chat__heading h3 { margin: .25rem 0 0; }
+.office-chat__heading .eyebrow { color: #00F0FF; }
+.office-chat__heading label, .office-chat__form label { display: grid; gap: .35rem; color: #00F0FF; font-size: .8rem; font-weight: 700; }
+.office-chat select, .office-chat textarea { width: 100%; padding: .65rem; color: #00F0FF; background: #0A192F; border: 1px solid #00F0FF; border-radius: 7px; }
+.office-chat select { min-width: min(18rem, 80vw); }
+.office-chat textarea { resize: vertical; }
+.office-chat__messages { display: grid; gap: .65rem; max-height: 18rem; overflow: auto; padding: .75rem; border: 1px solid #00F0FF; border-radius: 8px; }
+.office-chat__message { padding: .6rem .75rem; border-left: 2px solid #00F0FF; }
+.office-chat__message p { margin: .35rem 0 0; color: #00F0FF; white-space: pre-wrap; overflow-wrap: anywhere; }
+.office-chat__message strong, .office-chat__empty, .office-chat__pending { color: #00F0FF; }
+.office-chat__message--user { justify-self: end; width: min(85%, 42rem); }
+.office-chat__message--assistant { justify-self: start; width: min(95%, 48rem); }
+.office-chat__form { display: grid; gap: .55rem; }
+.office-chat__form .office-run-button { justify-self: start; color: #0A192F; background: #00F0FF; }
+.office-chat__form .office-run-button:disabled { opacity: .55; cursor: not-allowed; }
+@media(max-width: 650px) { .office-chat__heading { align-items: stretch; } .office-chat__heading > label { width: 100%; } .office-chat__message--user, .office-chat__message--assistant { width: 100%; } }

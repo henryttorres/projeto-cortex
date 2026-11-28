@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiError, api } from './api';
+import OfficePixelCanvas from './OfficePixelCanvas';
 import {
   AvailableOfficeAssets,
   OfficeAgentId,
@@ -30,7 +31,9 @@ type SeedRun = {
   createdAt: string;
 };
 type OfficeState = { runs: SeedRun[] };
-type OfficeEvent = OfficeTrace & { type: string; runId: string; seedId: string };
+type OfficeEvent = OfficeTrace & { type: string; runId: string; seedId?: string };
+type Subject = { id: string; name: string };
+type ChatMessage = { role: 'user' | 'assistant'; text: string };
 type Room = {
   id: string;
   title: string;
@@ -72,7 +75,7 @@ function isOfficeEvent(value: unknown): value is OfficeEvent {
   const event = value as Record<string, unknown>;
   return typeof event.type === 'string'
     && typeof event.runId === 'string'
-    && typeof event.seedId === 'string'
+    && (event.seedId === undefined || typeof event.seedId === 'string')
     && typeof event.room === 'string'
     && typeof event.status === 'string'
     && typeof event.details === 'string'
@@ -81,6 +84,22 @@ function isOfficeEvent(value: unknown): value is OfficeEvent {
 
 function eventTrace(trace: OfficeTrace, runId: string, seedId: string): OfficeEvent {
   return { ...trace, type: 'room.transition', runId, seedId };
+}
+
+function eventsForRun(run: SeedRun): OfficeEvent[] {
+  const result = run.report.results[0];
+  return [
+    ...result.office_trace.map(trace => eventTrace(trace, run.id, result.seed_id)),
+    {
+      type: 'seed.completed',
+      runId: run.id,
+      seedId: result.seed_id,
+      room: 'supervisor',
+      status: run.status.toUpperCase(),
+      details: 'Resultado recuperado do histórico da turma.',
+      timestamp: run.createdAt,
+    },
+  ];
 }
 
 function RoomAvatar({ agentId, assets, active }: {
@@ -105,9 +124,16 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
   onSessionExpired: () => void;
 }) {
   const [selectedRoom, setSelectedRoom] = useState('reception');
+  const [selectedAgentId, setSelectedAgentId] = useState<OfficeAgentId>('coordinator');
   const [activeRoom, setActiveRoom] = useState('');
   const [selectedSeed, setSelectedSeed] = useState<string>(seedOptions[0].id);
   const [runningSeed, setRunningSeed] = useState('');
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [selectedSubjectId, setSelectedSubjectId] = useState('');
+  const [chatPrompt, setChatPrompt] = useState('');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatPending, setChatPending] = useState(false);
   const [selectedRunId, setSelectedRunId] = useState('');
   const [runs, setRuns] = useState<SeedRun[]>([]);
   const [events, setEvents] = useState<OfficeEvent[]>([]);
@@ -132,8 +158,7 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
       setRuns(state.runs);
       if (state.runs[0]) {
         setSelectedRunId(current => current || state.runs[0].id);
-        const latestResult = state.runs[0].report.results[0];
-        setEvents(latestResult.office_trace.map(trace => eventTrace(trace, state.runs[0].id, latestResult.seed_id)));
+        setEvents(eventsForRun(state.runs[0]));
       }
     } catch (err) {
       handleError(err);
@@ -148,6 +173,25 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
       setAssetError(err instanceof Error ? err.message : 'Assets opcionais indisponíveis.');
     });
   }, [refreshState]);
+
+  useEffect(() => {
+    let active = true;
+    setSubjectsLoading(true);
+    setSubjects([]);
+    setSelectedSubjectId('');
+    setChatMessages([]);
+    setChatPrompt('');
+    api<Subject[]>(`/classes/${classId}/subjects`).then(items => {
+      if (!active) return;
+      setSubjects(items);
+      setSelectedSubjectId(items[0]?.id || '');
+    }).catch(err => {
+      if (active) handleError(err);
+    }).finally(() => {
+      if (active) setSubjectsLoading(false);
+    });
+    return () => { active = false; };
+  }, [classId, handleError]);
 
   useEffect(() => {
     let active = true;
@@ -166,14 +210,15 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
       }
       if (!active) return;
       setEvents(previous => [...previous, payload].slice(-60));
-      setActiveRoom(payload.room);
-      if (payload.type === 'seed.started') setRunningSeed(payload.seedId);
+      const terminal = ['seed.completed', 'seed.failed', 'chat.completed', 'chat.failed'].includes(payload.type);
+      setActiveRoom(terminal ? '' : payload.room);
+      if (payload.type === 'seed.started' && payload.seedId) setRunningSeed(payload.seedId);
       if (payload.type === 'seed.completed' || payload.type === 'seed.failed') {
         setRunningSeed('');
         void refreshState();
       }
     };
-    const eventTypes = ['seed.started', 'room.transition', 'seed.completed', 'seed.failed'];
+    const eventTypes = ['seed.started', 'room.transition', 'seed.completed', 'seed.failed', 'chat.started', 'chat.completed', 'chat.failed'];
     for (const eventType of eventTypes) stream.addEventListener(eventType, receive);
     stream.onopen = () => { if (active) setStreamStatus('connected'); };
     stream.onerror = () => {
@@ -186,6 +231,9 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
   }, [classId, refreshState]);
 
   const selectedRoomData = rooms.find(room => room.id === selectedRoom) || rooms[0];
+  const selectedRoomIsActive = activeRoom === selectedRoomData.id
+    || (selectedRoomData.id === 'security' && activeRoom === 'supervisor')
+    || (selectedRoomData.id === 'classroom' && activeRoom === 'professor');
   const selectedRun = useMemo(
     () => runs.find(run => run.id === selectedRunId) || runs[0],
     [runs, selectedRunId],
@@ -195,7 +243,7 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
     : runs.find(run => run.seedId === selectedSeed);
   const selectedSeedInfo = seedOptions.find(seed => seed.id === selectedSeed) || seedOptions[0];
   const latestResult = selectedSeedRun?.report.results[0];
-  const supervisorEvent = [...events].reverse().find(event => event.room === 'supervisor');
+  const supervisorEvent = [...events].reverse().find(event => event.room === 'supervisor' && event.type === 'room.transition');
   const verdict = supervisorEvent?.status
     || selectedRun?.report.results[0]?.office_trace.find(trace => trace.room === 'supervisor')?.status
     || '';
@@ -218,6 +266,33 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
       setRunningSeed('');
       handleError(err);
     }
+  }
+
+  async function sendOfficeMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const message = chatPrompt.trim();
+    if (!selectedSubjectId || !message || chatPending || runningSeed) return;
+    setChatMessages(previous => [...previous, { role: 'user', text: message }]);
+    setChatPrompt('');
+    setChatPending(true);
+    setError('');
+    setNotice('');
+    try {
+      const response = await api<{ answer: string }>('/ai/office/chat', {
+        method: 'POST',
+        body: JSON.stringify({ classId, subjectId: selectedSubjectId, message }),
+      });
+      setChatMessages(previous => [...previous, { role: 'assistant', text: response.answer }]);
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setChatPending(false);
+    }
+  }
+
+  function selectAgent(agentId: OfficeAgentId, roomId: string) {
+    setSelectedAgentId(agentId);
+    setSelectedRoom(roomId);
   }
 
   return <section className="cortex-office" aria-labelledby="cortex-office-title">
@@ -243,50 +318,29 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
 
     <div className="office-workspace">
       <section className="office-floor" aria-label="Planta do escritório com seis salas">
-        <svg className="office-floor__connectors" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M165 120 C280 120 360 120 500 120 S720 120 835 120 M835 120 C835 240 165 260 165 390 M165 390 C280 390 360 390 500 390 M500 390 C640 390 720 390 835 390" />
-          <path d="M165 120 C280 120 360 120 500 120 S720 120 835 120 M835 120 C835 240 165 260 165 390 M165 390 C280 390 360 390 500 390 M500 390 C640 390 720 390 835 390" className="office-floor__signal" />
-        </svg>
-        {rooms.map(room => {
-          const roomActive = activeRoom === room.id
-            || (room.id === 'security' && activeRoom === 'supervisor')
-            || (room.id === 'classroom' && activeRoom === 'professor');
-          const roomAssets = assets?.rooms[room.wing];
-          return <button
-            className={`office-room${selectedRoom === room.id ? ' office-room--selected' : ''}${roomActive ? ' office-room--active' : ''}`}
-            key={room.id}
-            type="button"
-            aria-pressed={selectedRoom === room.id}
-            onClick={() => setSelectedRoom(room.id)}
-            style={roomAssets ? { backgroundImage: `linear-gradient(135deg, rgba(10,25,47,.92), rgba(10,25,47,.78)), url("${roomAssets}")` } : undefined}
-          >
-            <span className="office-room__index">{String(rooms.indexOf(room) + 1).padStart(2, '0')}</span>
-            <span className="office-room__avatars">
-              {room.agents.map(agentId => (
-                <span className="office-avatar" key={agentId}>
-                  <RoomAvatar
-                    agentId={agentId}
-                    assets={assets?.agents[agentId]}
-                    active={roomActive || selectedRoom === room.id}
-                  />
-                </span>
-              ))}
-            </span>
-            <strong>{room.title}</strong>
-            <span className="office-room__agents">{room.agents.map(agent => agentLabels[agent]).join(' · ')}</span>
-            <span className="office-room__activity">{roomActive ? 'ATIVA AGORA' : 'SALA DISPONÍVEL'}</span>
-          </button>;
-        })}
+        <OfficePixelCanvas
+          rooms={rooms}
+          agentLabels={agentLabels}
+          events={events}
+          selectedAgentId={selectedAgentId}
+          onAgentSelect={selectAgent}
+        />
       </section>
 
       <aside className="office-inspector" aria-labelledby="office-inspector-title">
         <p className="eyebrow">Inspetor de sala</p>
         <h3 id="office-inspector-title">{selectedRoomData.title}</h3>
         <p>{selectedRoomData.purpose}</p>
+        <div className="office-inspector__agent">
+          <span className="office-inspector__portrait">
+            <RoomAvatar agentId={selectedAgentId} assets={assets?.agents[selectedAgentId]} active={false} />
+          </span>
+          <div><strong>{agentLabels[selectedAgentId]}</strong><span>Agente selecionado</span></div>
+        </div>
         <dl>
           <div><dt>Agentes</dt><dd>{selectedRoomData.agents.map(agent => agentLabels[agent]).join(', ')}</dd></div>
           <div><dt>Modelo / mecanismo</dt><dd>{selectedRoomData.model}</dd></div>
-          <div><dt>Atividade</dt><dd>{activeRoom === selectedRoomData.id ? 'Processando evento' : 'Aguardando atividade'}</dd></div>
+          <div><dt>Atividade</dt><dd>{selectedRoomIsActive ? 'Processando evento' : 'Aguardando atividade'}</dd></div>
         </dl>
         <div className="office-inspector__logs">
           <h4>Eventos recentes</h4>
@@ -296,6 +350,48 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
         </div>
       </aside>
     </div>
+
+    <section className="office-chat" aria-labelledby="office-chat-title">
+      <div className="office-chat__heading">
+        <div><p className="eyebrow">Conversa ao vivo · ADK</p><h3 id="office-chat-title">Conversar com o Escritório</h3></div>
+        <label htmlFor="office-chat-subject">Disciplina
+          <select
+            id="office-chat-subject"
+            value={selectedSubjectId}
+            onChange={event => setSelectedSubjectId(event.target.value)}
+            disabled={subjectsLoading || !subjects.length || chatPending}
+          >
+            <option value="">{subjectsLoading ? 'Carregando disciplinas…' : 'Selecione uma disciplina'}</option>
+            {subjects.map(subject => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
+          </select>
+        </label>
+      </div>
+      {!subjectsLoading && !subjects.length && <p role="status">Cadastre uma disciplina nesta turma para iniciar uma conversa com o agente.</p>}
+      <div className="office-chat__messages" aria-live="polite">
+        {chatMessages.length
+          ? chatMessages.map((message, index) => <article className={`office-chat__message office-chat__message--${message.role}`} key={`${message.role}-${index}`}>
+            <strong>{message.role === 'user' ? 'Você' : 'Escritório Cortéx'}</strong>
+            <p>{message.text}</p>
+          </article>)
+          : <p className="office-chat__empty">A conversa usará o acervo e as ferramentas da disciplina selecionada.</p>}
+        {chatPending && <p className="office-chat__pending" role="status">O fluxo real dos agentes está em andamento…</p>}
+      </div>
+      <form className="office-chat__form" onSubmit={event => void sendOfficeMessage(event)}>
+        <label htmlFor="office-chat-prompt">Sua mensagem</label>
+        <textarea
+          id="office-chat-prompt"
+          value={chatPrompt}
+          onChange={event => setChatPrompt(event.target.value)}
+          maxLength={4000}
+          rows={3}
+          required
+          placeholder="Converse com os agentes sobre esta disciplina…"
+        />
+        <button className="office-run-button" type="submit" disabled={!selectedSubjectId || !chatPrompt.trim() || chatPending || Boolean(runningSeed)}>
+          {chatPending ? 'Aguardando resposta…' : 'Enviar ao Escritório'}
+        </button>
+      </form>
+    </section>
 
     <section className="office-seeds" aria-labelledby="office-seeds-title">
       <div className="office-seeds__heading">
@@ -317,7 +413,7 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
         <div>
           <p className="office-seed-details__persona">{selectedSeedInfo.persona}</p>
           <p>{selectedSeedInfo.description}</p>
-          <button type="button" className="office-run-button" disabled={Boolean(runningSeed)} onClick={() => void runSeed()}>
+          <button type="button" className="office-run-button" disabled={Boolean(runningSeed) || chatPending} onClick={() => void runSeed()}>
             {runningSeed ? `Executando ${runningSeed}…` : `Executar ${selectedSeed}`}
           </button>
         </div>
@@ -343,7 +439,8 @@ export default function CortexOffice({ classId, className, onSessionExpired }: {
             <button type="button" aria-pressed={selectedRun?.id === run.id} onClick={() => {
               setSelectedRunId(run.id);
               setSelectedSeed(run.seedId);
-              setEvents(run.report.results[0].office_trace.map(trace => eventTrace(trace, run.id, run.seedId)));
+              setEvents(eventsForRun(run));
+              setActiveRoom('');
             }}>
               <strong>{run.seedId}</strong><span className={`office-history__status office-history__status--${run.status}`}>{run.status.toUpperCase()}</span>
               <time dateTime={run.createdAt}>{new Date(run.createdAt).toLocaleString('pt-BR')}</time>
