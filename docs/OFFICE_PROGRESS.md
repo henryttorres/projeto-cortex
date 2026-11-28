@@ -189,7 +189,8 @@
 - `npm run build` em `frontend/`: TypeScript e Vite concluidos com exit code 0; 32 modulos transformados.
 - `ai-agent\.venv\Scripts\python.exe -m cortex_agent.evals.run_seed_evals --all` em `ai-agent/`: **5 seeds passaram, 0 falhas**; relatorios incluem dialogo fixture e `office_trace`.
 - `git diff --check`: passou.
-- A pagina publica local carregou; inspecao visual autenticada da secao ficou pendente porque o navegador de validacao nao tinha sessao de docente. A autenticacao, persistencia e SSE seguem cobertas pelos testes de integracao do Portao 4.
+- A validacao visual autenticada foi concluida com a conta local de desenvolvimento: a turma 2º ano A abriu, o stream conectou e as seis salas apareceram.
+- A primeira captura revelou que o Vite responde `200 text/html` para assets opcionais inexistentes. O detector agora valida `Content-Type` para usar os fallbacks SVG/CSS; a captura seguinte confirmou que os avatares de fallback aparecem sem imagens quebradas.
 
 ### Portao 5 — validado
 
@@ -209,6 +210,7 @@ Os criterios automatizados definidos para a Etapa 5 passaram. A validacao ponta 
 #### Arquivos criados ou alterados nesta etapa
 
 - `docs/OFFICE_PROGRESS.md`: atualizado com os resultados do Portao 5, validacao cruzada, commits e handover final.
+- `frontend/src/office-assets.ts`: validacao do tipo MIME evita tratar o fallback HTML do Vite como imagem ou video opcional.
 
 #### Evidencias
 
@@ -217,6 +219,8 @@ Os criterios automatizados definidos para a Etapa 5 passaram. A validacao ponta 
 - `npm test` em `backend/`: **14 testes passaram**, incluindo persistencia e SSE.
 - `npm run build` em `frontend/`: TypeScript e Vite concluidos; 32 modulos transformados.
 - `ai-agent\.venv\Scripts\python.exe -m cortex_agent.evals.run_seed_evals --all` em `ai-agent/`: **5 seeds passaram, 0 falhas**.
+- Validacao no navegador local autenticado: Escritório IA renderizou as seis salas, mostrou `Stream conectado` e exibiu avatares SVG quando os arquivos opcionais nao existem.
+- `HEAD` para os assets ausentes retornava `200 text/html`; apos o ajuste de `Content-Type`, os fallbacks renderizam corretamente.
 - `git diff --check`: passou antes dos commits e nas alteracoes de documentacao.
 - `.env`, `.venv`, `__pycache__`, `.adk`, `.worktrees` e `.local-data` nao foram adicionados.
 - `referencias/fragmentos/` permaneceu fora dos commits por ser conteudo preexistente.
@@ -226,12 +230,14 @@ Os criterios automatizados definidos para a Etapa 5 passaram. A validacao ponta 
 - `745e47a feat: add Cortex agent workflows`
 - `a4647a1 feat: persist office seed runs and stream telemetry`
 - `ec2ed48 feat: add virtual Cortex office UI`
+- Commit de follow-up: validacao MIME e fallback visual; hash registrado no historico final.
 
 Nenhum `git push` foi executado.
 
 ## Handover atual
 
 - Etapas 0–6 concluidas na branch `dev`; Portoes 0–6 validados conforme as evidencias deste documento.
-- Os tres commits de implementacao estao registrados acima. Nenhum push foi feito.
-- Revisao visual autenticada do escritorio permanece pendente: a sessao de navegador de validacao estava sem login de docente. Os testes de API cobrem autorizacao, persistencia e SSE.
+- Os commits de implementacao estao registrados acima. Nenhum push foi feito.
+- A revisao visual autenticada do escritorio foi concluida; a sessao do navegador permanece aberta na tela do Escritório IA.
+- Uma conta admin de desenvolvimento foi provisionada somente no banco local para essa validacao; a senha nao foi gravada no repositorio.
 - `referencias/fragmentos/` foi preservada, sem ser adicionada ao Git.

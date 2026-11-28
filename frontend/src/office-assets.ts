@@ -24,6 +24,9 @@ async function findOptionalAsset(path: string): Promise<string | undefined> {
   const response = await fetch(path, { method: 'HEAD' });
   if (response.status === 404) return undefined;
   if (!response.ok) throw new Error(`Falha ao verificar asset opcional (${response.status}).`);
+  const expectedType = path.endsWith('.webp') ? 'image/webp' : 'video/mp4';
+  const contentType = response.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase();
+  if (contentType !== expectedType) return undefined;
   return path;
 }
 
